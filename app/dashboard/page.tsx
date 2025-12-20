@@ -1,5 +1,10 @@
-import { PageShell } from "@/app/dashboard/_components/PageShell";
+import React from 'react'
+import DashboardContent from './_components/DashboardContent'
 
-export default function Page() {
-  return <PageShell title="Dashboard" description="Admin overview dashboard." />;
+export default function page() {
+  return (
+    <div>
+      <DashboardContent/>
+    </div>
+  )
 }

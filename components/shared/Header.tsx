@@ -1,6 +1,7 @@
 'use client';
 
 import { Bell, Menu, User } from 'lucide-react';
+import { Input } from '../ui/input';
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -39,6 +40,9 @@ export function Header({
           <div className="hidden md:block">
              <h1 className="font-bold text-lg text-gray-800 leading-none">Admin Panel</h1>
              <p className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mt-1">Management System</p>
+          </div>
+          <div>
+            <Input/>
           </div>
         </div>
       </div>

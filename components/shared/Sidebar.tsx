@@ -173,7 +173,7 @@ export function Sidebar({
 
       <aside
         className={`
-          fixed left-0 top-0 bottom-0 z-50 bg-white border-r border-gray-100
+          fixed left-0 top-0 bottom-0 z-50 sidebar-scroll bg-white border-r border-gray-100
           transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1)
           ${open ? "translate-x-0" : "-translate-x-full"} 
           md:translate-x-0 md:top-16 md:h-[calc(100vh-4rem)]
