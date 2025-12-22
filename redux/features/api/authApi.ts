@@ -34,6 +34,14 @@ export interface SignupRequest {
   password: string;
 }
 
+export interface RefreshTokenResponse {
+  success: boolean;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+  };
+  timestamp: string;
+}
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -76,6 +84,18 @@ export const authApi = baseApi.injectEndpoints({
       query: () => ({
         url: "/auth/me",
         method: "GET",
+      }),
+    }),
+
+    /**
+     * REFRESH TOKEN
+     * Used internally by baseQueryWithReauth for automatic token refresh
+     */
+    refreshToken: builder.mutation<RefreshTokenResponse, { refreshToken: string }>({
+      query: (body) => ({
+        url: "/auth/refresh",
+        method: "POST",
+        body,
       }),
     }),
   }),

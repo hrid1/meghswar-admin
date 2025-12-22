@@ -6,8 +6,8 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   // Override default ignores of eslint-config-next.
-  // rules:{
-  //   // Example: customize a rule
+  // rules{
+  // //   // Example: customize a rule
   //   "@typescript-eslint/no-explicit-any": "off",
   // },   
   globalIgnores([

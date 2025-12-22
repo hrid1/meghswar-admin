@@ -1,6 +1,10 @@
-import { PageShell } from "@/app/dashboard/_components/PageShell";
+import React from 'react'
+import RiderListPage from './_components/RiderListPage'
 
-export default function Page() {
-  return <PageShell title="Rider List" description="Browse and manage riders." />;
+export default function page() {
+  return (
+    <div>
+      <RiderListPage/>
+    </div>
+  )
 }
-

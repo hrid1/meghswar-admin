@@ -74,6 +74,31 @@ const authSlice = createSlice({
       setCookie(REFRESH_TOKEN_COOKIE_KEY, action.payload.refresh_token);
     },
 
+    /*
+     * Update user details after hydration (/auth/me) without touching tokens
+     */
+    setUser: (state, action: PayloadAction<User | null>) => {
+      state.user = action.payload;
+    },
+
+    /**
+     * REFRESH TOKEN handler
+     * Updates tokens after successful refresh (used by baseQueryWithReauth)
+     * Preserves existing user data
+     */
+    setTokens: (
+      state,
+      action: PayloadAction<{
+        access_token: string;
+        refresh_token: string;
+      }>
+    ) => {
+      state.access_token = action.payload.access_token;
+      state.refresh_token = action.payload.refresh_token;
+      setCookie(ACCESS_TOKEN_COOKIE_KEY, action.payload.access_token);
+      setCookie(REFRESH_TOKEN_COOKIE_KEY, action.payload.refresh_token);
+    },
+
     logOut: (state) => {
       state.access_token = null;
       state.refresh_token = null; 
@@ -84,8 +109,8 @@ const authSlice = createSlice({
   },
 });
 
-// Action creators that components will use: login/signup -> setCredentials, logout -> logOut
-export const { setCredentials, logOut } = authSlice.actions;
+// Action creators that components will use: login/signup -> setCredentials, hydrate user -> setUser, refresh tokens -> setTokens, logout -> logOut
+export const { setCredentials, setUser, setTokens, logOut } = authSlice.actions;
 
 // Default reducer export, to be registered in the Redux store
 export default authSlice.reducer;

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { Header } from '@/components/shared/Header';
-import { Sidebar } from '@/components/shared/Sidebar';
-import { ReactNode, useState } from 'react';
-
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { Header } from "@/components/shared/Header";
+import { Sidebar } from "@/components/shared/Sidebar";
+import { ReactNode, useState } from "react";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -29,14 +29,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <main 
+      <main
         className={` contai ner mx-auto
           pt-20 px-2 xl:px-6
           transition-all duration-300 ease-in-out 
           ${collapsed ? "md:ml-20" : "md:ml-60"}
         `}
       >
-        {children}
+        <AuthGuard> {children} </AuthGuard>
       </main>
     </div>
   );

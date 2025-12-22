@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
@@ -8,7 +8,7 @@ import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useLoginMutation } from "@/redux/features/api/authApi";
-import { useAppDispatch } from "@/redux/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
 import { setCredentials } from "@/redux/features/auth/authSlice";
 
 type LoginFormData = {
@@ -33,10 +33,18 @@ export default function LoginContent() {
 
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const accessToken = useAppSelector((state) => state.auth.access_token);
   const [login, { isLoading }] = useLoginMutation();
 
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [showPassword, setShowPassword] = useState(false);
+
+  // If already authenticated, redirect away from login page
+  useEffect(() => {
+    if (accessToken) {
+      router.replace("/dashboard");
+    }
+  }, [accessToken, router]);
 
   /**
    * Handle sign-in flow:

@@ -1,6 +1,10 @@
-import { PageShell } from "@/app/dashboard/_components/PageShell";
+import React from 'react'
+import ParcelHistoryTable from './_components/ParcelHistoryTable'
 
-export default function Page() {
-  return <PageShell title="Parcel History" description="View parcel status history." />;
+export default function page() {
+  return (
+    <div>
+      <ParcelHistoryTable/>
+    </div>
+  )
 }
-

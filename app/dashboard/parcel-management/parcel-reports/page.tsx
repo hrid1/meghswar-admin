@@ -1,6 +1,10 @@
-import { PageShell } from "@/app/dashboard/_components/PageShell";
+import React from 'react'
+import ParcelReportTable from './_components/ParcelReportTable'
 
-export default function Page() {
-  return <PageShell title="Parcel Report" description="Parcel reporting and analytics." />;
+export default function page() {
+  return (
+    <div>
+      <ParcelReportTable/>
+    </div>
+  )
 }
-
