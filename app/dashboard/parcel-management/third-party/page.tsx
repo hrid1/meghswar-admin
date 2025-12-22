@@ -1,6 +1,10 @@
-import { PageShell } from "@/app/dashboard/_components/PageShell";
+import React from 'react'
+import ThirdPartyTable from './_components/ThirdPartyTable'
 
-export default function Page() {
-  return <PageShell title="Third Party" description="Third-party parcel handling." />;
+export default function page() {
+  return (
+    <div>
+      <ThirdPartyTable/>
+    </div>
+  )
 }
-
