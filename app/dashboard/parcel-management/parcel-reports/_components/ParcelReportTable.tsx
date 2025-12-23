@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 
 import { parcelReportColumns, ParcelReportRow } from "./ParcelReportColumns";
 import { mockParcels } from "./ParcelReportFakeData";
+import CustomDialog from "@/components/reusable/CustomDialog";
 
 type RowId = string | number;
 
@@ -110,7 +111,7 @@ export default function ParcelReportTable() {
   const canBulkUpdate = cleanedSelectedIds.length > 0;
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="space-y-4">
       {/* 🔍 SEARCH + FILTER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -171,7 +172,7 @@ export default function ParcelReportTable() {
       />
 
       {/* MODAL */}
-      {/* <CustomDialog open={openModal} setOpen={setOpenModal}>
+      <CustomDialog open={openModal} onOpenChange={setOpenModal}>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <div className="text-sm font-semibold">
             {selectedParcel ? (
@@ -234,7 +235,7 @@ export default function ParcelReportTable() {
             Confirm &amp; Update
           </Button>
         </form>
-      </CustomDialog> */}
+      </CustomDialog>
     </div>
   );
 }

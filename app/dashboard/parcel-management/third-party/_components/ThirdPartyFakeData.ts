@@ -2,51 +2,63 @@ import type { ThirdPartyParcelRow } from "./ThirdPartyColumns";
 
 export const mockThirdPartyParcels: ThirdPartyParcelRow[] = [
   {
-    parcelid: "#P-1001",
+    parcelid: "#139679",
     customerInfo: {
       name: "Farzana Rahman",
-      phone: "+8801711223344",
-      address: "House 12, Road 5, Dhanmondi, Dhaka",
+      phone: "+880123456789",
+      address:
+        "Plot#142, Safwan Road, Block#B, Bashundhara Residential Area, Baridhara, Dhaka - 1229",
     },
-    additionalNote: "Handle with care",
+    additionalNote:
+      "Please handle with care. Fragile item inside. Keep upright and avoid pressure or heat exposure.",
     merchant: {
       name: "Booklet Design BD",
-      phone: "+8801677889900",
+      phone: "+880123456789",
     },
-    area: "Dhanmondi - 03",
-    amount: 1250,
+    area: "Area 01: Dhanmondi",
+    amount: 1187,
     age: "2 Days",
+    createdAt: "20 Mar, 2025 2:35 PM",
+    updatedAt: "20 Mar, 2025 2:35 PM",
   },
   {
-    parcelid: "#P-1002",
+    parcelid: "#139679",
     customerInfo: {
-      name: "Nusrat Jahan",
-      phone: "+8801911223344",
-      address: "Mirpur DOHS, Dhaka-1216",
+      name: "Farzana Rahman",
+      phone: "+880123456789",
+      address:
+        "Plot#142, Safwan Road, Block#B, Bashundhara Residential Area, Baridhara, Dhaka - 1229",
     },
-    additionalNote: "Leave at gate",
+    additionalNote:
+      "Please handle with care. Fragile item inside. Keep upright and avoid pressure or heat exposure.",
     merchant: {
-      name: "TechZone BD",
-      phone: "+8801311223344",
+      name: "Booklet Design BD",
+      phone: "+880123456789",
     },
-    area: "Mirpur - 12",
-    amount: 950,
-    age: "1 Day",
+    area: "Area 01: Dhanmondi",
+    amount: 1187,
+    age: "2 Days",
+    createdAt: "20 Mar, 2025 2:35 PM",
+    updatedAt: "20 Mar, 2025 2:35 PM",
   },
   {
-    parcelid: "#P-1003",
+    parcelid: "#139679",
     customerInfo: {
-      name: "Shahriar Hossain",
-      phone: "+8801811445566",
-      address: "Uttara Sector 10, Road 8, Dhaka",
+      name: "Farzana Rahman",
+      phone: "+880123456789",
+      address:
+        "Plot#142, Safwan Road, Block#B, Bashundhara Residential Area, Baridhara, Dhaka - 1229",
     },
-    additionalNote: "Call before delivery",
+    additionalNote:
+      "Please handle with care. Fragile item inside. Keep upright and avoid pressure or heat exposure.",
     merchant: {
-      name: "Fashion Hub BD",
-      phone: "+8801555332211",
+      name: "Booklet Design BD",
+      phone: "+880123456789",
     },
-    area: "Uttara - 10",
-    amount: 1750,
-    age: "3 Days",
+    area: "Area 01: Dhanmondi",
+    amount: 1187,
+    age: "2 Days",
+    createdAt: "20 Mar, 2025 2:35 PM",
+    updatedAt: "20 Mar, 2025 2:35 PM",
   },
 ];

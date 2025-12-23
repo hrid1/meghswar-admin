@@ -6,38 +6,39 @@ const myTabs = [
   {
     name: "Request List",
     value: "request-list",
-    content: (
-      <>
-        <PickupRequestTable />
-      </>
-    ),
+    content: <PickupRequestTable />,
   },
   {
     name: "Assigned Rider",
     value: "assigned-rider",
-    content: (
-      <>
-        <AssignRiderTable/>
-      </>
-    ),
+    content: <AssignRiderTable />,
   },
   {
     name: "Pickup Done",
     value: "pickup-done",
     content: (
-      <>
-        {/* <PickupRequestTableRider /> */}
-      </>
+      <div className="p-4 text-center text-neutral-500">
+        No pickup done records found
+      </div>
     ),
   },
 ];
 
-export default function page() {
+export default function Page() {
   return (
     <div>
-       <h1 className="text-2xl font-bold mb-4">Pickup Request</h1>
+      <h1 className="text-2xl font-bold mb-6">Pickup Request</h1>
 
-      <CustomTabs tabs={myTabs} defaultValue=""></CustomTabs>
+      <CustomTabs 
+        tabs={myTabs} 
+        defaultValue="request-list"
+        
+        // Optional customizations:
+        // variant="pills" // For pill-style tabs
+        // fullWidth // For equal width tabs
+        // tabsListClassName="mb-4" // Additional margin
+        // tabContentClassName="p-4 bg-white rounded-lg shadow-sm" // Styled content area
+      />
     </div>
   );
 }

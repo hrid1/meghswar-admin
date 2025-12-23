@@ -51,24 +51,8 @@ export const pickupRequestColumns = (
     header: "Parcel Quantity",
     width: "10%",
     render: (row) => (
-      <span className="font-semibold text-gray-900">{row.amount}</span>
+      <span className="font-semibold text-gray-900 text-center block">{row.amount}</span>
     ),
   },
-  {
-    key: "action",
-    header: "Action",
-    width: "16%",
-    render: (row) => (
-      <Button
-        size="sm"
-        className="bg-orange-500 text-white"
-        onClick={(e) => {
-          e.stopPropagation();
-          onClickAssign(row);
-        }}
-      >
-        Assign
-      </Button>
-    ),
-  },
+ 
 ];

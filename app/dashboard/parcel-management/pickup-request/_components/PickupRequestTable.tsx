@@ -2,49 +2,34 @@
 
 import React, { useMemo, useState } from "react";
 import { DataTable } from "@/components/reusable/DataTable";
-// import CustomDialog from "@/components/reusable/CustomDialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { pickupRequestColumns, PickupRequestRow } from "./PickupRequestColumns";
+import {
+  pickupRequestColumns,
+  type PickupRequestRow,
+} from "./PickupRequestColumns";
 import { mockPickupRequests } from "./fakeData";
-
-
-
+import { exportRowsToCsv, type ExportRow } from "@/lib/exportCsv";
+import { Input } from "@/components/ui/input";
+import CustomSearchInput from "@/components/reusable/CustomSearchInput";
 
 type RowId = string | number;
+type FilterBy = "merchant" | "rider" | "hub";
 
 export default function PickupRequestTable() {
   // table selections (store ids, not index)
   const [selectedIds, setSelectedIds] = useState<RowId[]>([]);
+  const [filterBy, setFilterBy] = useState<FilterBy>("merchant");
+  const [search, setSearch] = useState("");
 
-  // modal
-  const [openModal, setOpenModal] = useState(false);
-
-  // single mode
-  const [selectedParcel, setSelectedParcel] = useState<PickupRequestRow | null>(
-    null
-  );
-
-  // search
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // 🔍 SEARCH (client now, backend later)
-  const filteredParcels = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return mockPickupRequests;
-
-    return mockPickupRequests.filter((p) => {
-      return (
-        p.parcelid.toLowerCase().includes(q) ||
-        p.merchant.name.toLowerCase().includes(q)
-      );
-    });
-  }, [searchQuery]);
+  // For now fake; later you'll connect backend and filter server-side.
+  const filteredRows = useMemo(() => {
+    return mockPickupRequests;
+  }, [filterBy]);
 
   // keep selection valid when filter changes
   const visibleIds = useMemo(
-    () => filteredParcels.map((p) => p.parcelid),
-    [filteredParcels]
+    () => filteredRows.map((p) => p.parcelid),
+    [filteredRows]
   );
 
   const cleanedSelectedIds = useMemo(
@@ -52,77 +37,79 @@ export default function PickupRequestTable() {
     [selectedIds, visibleIds]
   );
 
-  // columns (single action opens modal)
-  const columns = useMemo(
-    () =>
-      pickupRequestColumns((row) => {
-        setSelectedParcel(row); // single mode
-        setOpenModal(true);
-      }),
-    []
-  );
+  const selectedRows = useMemo(() => {
+    const set = new Set(cleanedSelectedIds.map(String));
+    return filteredRows.filter((r) => set.has(String(r.parcelid)));
+  }, [filteredRows, cleanedSelectedIds]);
 
-  const canBulkAssign = cleanedSelectedIds.length > 0;
+  const columns = useMemo(() => pickupRequestColumns(() => {}), []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleExport = () => {
+    const rowsToExport = selectedRows.length > 0 ? selectedRows : filteredRows;
 
-    // ids to submit
-    const requestIds = selectedParcel
-      ? [selectedParcel.parcelid]
-      : cleanedSelectedIds.map(String);
+    const exportRows: ExportRow[] = rowsToExport.map((r) => ({
+      requestId: r.parcelid,
+      pickupLocation: r.additionalNote,
+      merchantName: r.merchant.name,
+      merchantPhone: String(r.merchant.phone),
+      area: r.area,
+      parcelQuantity: String(r.amount),
+    }));
 
-    if (requestIds.length === 0) return;
-
-    try {
-      // replace with real API later
-      const res = await fetch("/api/assign-third-party", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestIds }),
-      });
-
-      const data = await res.json();
-      console.log("API Response:", data);
-
-      setOpenModal(false);
-      setSelectedParcel(null);
-      setSelectedIds([]); // optional: clear selection after submit
-    } catch (err) {
-      console.error("API error:", err);
-    }
+    exportRowsToCsv(exportRows, "parcels_export.csv");
   };
 
   return (
     <div className="space-y-4">
-     
-
-      {/* SEARCH + BULK BUTTON */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <Input
-          placeholder="Search parcels..."
-          className="w-full sm:w-72"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+      {/* search bar */}
+      <div className="flex items-center justify-between">
+        <CustomSearchInput
+          placeholder="Search by Parcel ID, Customer Name, Customer Phone No. or Merchant Name..."
+          value={search}
+          onChange={setSearch}
+          className="max-w-140"
+          inputClassName="w-full"
         />
+      </div>
+      {/* Top bar */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 rounded-xl bg-[#FDEFE6] px-4 py-3">
+        {/* Left: selected badge */}
+        <div className="flex items-center gap-3">
+          <div className="rounded-md border border-[#F7C9AE] bg-white px-3 py-1 text-sm">
+            <span className="font-semibold">{cleanedSelectedIds.length}</span>{" "}
+            Selected
+          </div>
+        </div>
 
-        <Button
-          disabled={!canBulkAssign}
-          className="bg-orange-600/80 text-white"
-          onClick={() => {
-            if (!canBulkAssign) return;
-            setSelectedParcel(null); // bulk mode
-            setOpenModal(true);
-          }}
-        >
-          Assign Third Party
-        </Button>
+        {/* Middle: filter dropdown */}
+        <div className="flex items-center gap-2">
+          <select
+            className="rounded-md border border-[#F7C9AE] bg-white px-3 py-2 text-sm outline-none"
+            value={filterBy}
+            onChange={(e) => setFilterBy(e.target.value as FilterBy)}
+          >
+            <option value="merchant">Merchant</option>
+            <option value="rider">Rider</option>
+            <option value="hub">Hub</option>
+          </select>
+        </div>
+
+        {/* Right: export button */}
+        <div className="flex items-center justify-end">
+          <Button
+            variant="outline"
+            className="border-[#F7C9AE] bg-white hover:bg-white"
+            onClick={handleExport}
+          >
+            Export(CSV)
+          </Button>
+        </div>
       </div>
 
       {/* TABLE */}
       <DataTable<PickupRequestRow>
         columns={columns}
-        data={filteredParcels}
+        data={filteredRows}
         selectable
         minWidth={900}
         getRowId={(row) => row.parcelid}
@@ -136,34 +123,6 @@ export default function PickupRequestTable() {
         }}
         onToggleAll={(nextSelected) => setSelectedIds(nextSelected)}
       />
-
-      {/* MODAL */}
-      {/* <CustomDialog open={openModal} setOpen={setOpenModal}>
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          <div className="text-sm font-semibold">
-            {selectedParcel ? (
-              <>
-                Assign third party for:{" "}
-                <span className="text-orange-600">{selectedParcel.parcelid}</span>
-              </>
-            ) : (
-              <>
-                Bulk assign for:{" "}
-                <span className="text-orange-600">{cleanedSelectedIds.length}</span>{" "}
-                requests
-              </>
-            )}
-          </div>
-
-          <div className="text-sm text-gray-600">
-            This is still processing...
-          </div>
-
-          <Button type="submit" className="bg-orange-500 text-white w-full">
-            Confirm
-          </Button>
-        </form>
-      </CustomDialog> */}
     </div>
   );
 }

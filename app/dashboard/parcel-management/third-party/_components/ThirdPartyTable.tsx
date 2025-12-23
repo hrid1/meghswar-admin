@@ -4,12 +4,16 @@ import React, { useMemo, useState } from "react";
 import { DataTable } from "@/components/reusable/DataTable";
 // import CustomDialog from "@/components/reusable/CustomDialog";
 import { Button } from "@/components/ui/button";
+import CustomButton, { AppButton } from "@/components/reusable/CustomButton";
 import { Input } from "@/components/ui/input";
 
-
-import { thirdPartyColumns, type ThirdPartyParcelRow } from "./ThirdPartyColumns";
+import {
+  thirdPartyColumns,
+  type ThirdPartyParcelRow,
+} from "./ThirdPartyColumns";
 import { mockThirdPartyParcels } from "./ThirdPartyFakeData";
 import CustomDialog from "@/components/reusable/CustomDialog";
+import CustomSearchInput from "@/components/reusable/CustomSearchInput";
 
 type RowId = string | number;
 
@@ -19,7 +23,8 @@ export default function ThirdPartyTable() {
 
   // modal
   const [openModal, setOpenModal] = useState(false);
-  const [selectedParcel, setSelectedParcel] = useState<ThirdPartyParcelRow | null>(null);
+  const [selectedParcel, setSelectedParcel] =
+    useState<ThirdPartyParcelRow | null>(null);
 
   // search
   const [searchQuery, setSearchQuery] = useState("");
@@ -92,30 +97,64 @@ export default function ThirdPartyTable() {
   };
 
   return (
-    <div className="p-6 container mx-auto space-y-4">
-      <h1 className="text-2xl font-bold">All Parcel</h1>
-
+    <div className="px-6 container mx-auto space-y-4">
       {/* Search + Bulk */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <Input
-          placeholder="Search parcels..."
-          className="w-full sm:w-72"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-
-        <Button
+        <div>
+          <CustomSearchInput
+            placeholder="Search parcels..."
+            className="w-full sm:w-80"
+            value={searchQuery}
+            onChange={setSearchQuery}
+          />
+        </div>
+        <AppButton
+          variantType="primary"
           disabled={!canBulkAssign}
-          className="bg-orange-600/80 text-white"
           onClick={() => {
             if (!canBulkAssign) return;
-            setSelectedParcel(null); // bulk mode
+            setSelectedParcel(null);
             setOpenModal(true);
           }}
         >
+          {" "}
           Assign Third Party
-        </Button>
+        </AppButton>
       </div>
+
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 rounded-xl bg-[#FDEFE6] px-4 py-3">
+              {/* Left: selected badge */}
+              <div className="flex items-center gap-3">
+                <div className="rounded-md border border-[#F7C9AE] bg-white px-3 py-1 text-sm">
+                  <span className="font-semibold">{cleanedSelectedIds.length}</span>{" "}
+                  Selected
+                </div>
+              </div>
+      
+              {/* Middle: filter dropdown */}
+              {/* <div className="flex items-center gap-2">
+                <select
+                  className="rounded-md border border-[#F7C9AE] bg-white px-3 py-2 text-sm outline-none"
+                  value={filterBy}
+                  onChange={(e) => setFilterBy(e.target.value as FilterBy)}
+                >
+                  <option value="merchant">Merchant</option>
+                  <option value="rider">Rider</option>
+                  <option value="hub">Hub</option>
+                </select>
+              </div> */}
+      
+              {/* Right: export button */}
+              <div className="flex items-center justify-end">
+                <Button
+                  variant="outline"
+                  className="border-[#F7C9AE] bg-white hover:bg-white"
+                  // onClick={handleExport}
+                >
+                  Export(CSV)
+                </Button>
+              </div>
+            </div>
 
       {/* Table */}
       <DataTable<ThirdPartyParcelRow>
@@ -136,24 +175,30 @@ export default function ThirdPartyTable() {
       />
 
       {/* Modal */}
-      <CustomDialog open={openModal} setOpen={setOpenModal}>
+      <CustomDialog open={openModal} onOpenChange={setOpenModal}>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <div className="text-sm font-semibold">
             {selectedParcel ? (
               <>
                 Assign third party for:{" "}
-                <span className="text-orange-600">{selectedParcel.parcelid}</span>
+                <span className="text-orange-600">
+                  {selectedParcel.parcelid}
+                </span>
               </>
             ) : (
               <>
                 Bulk assign for:{" "}
-                <span className="text-orange-600">{cleanedSelectedIds.length}</span>{" "}
+                <span className="text-orange-600">
+                  {cleanedSelectedIds.length}
+                </span>{" "}
                 parcels
               </>
             )}
           </div>
 
-          <div className="text-sm text-gray-600">This is still processing...</div>
+          <div className="text-sm text-gray-600">
+            This is still processing...
+          </div>
 
           <Button type="submit" className="bg-orange-500 text-white w-full">
             Confirm

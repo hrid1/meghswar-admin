@@ -5,40 +5,51 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ReactNode } from "react";
+import { cn } from "@/lib/utils"; // Assuming you have a utility for className merging
 
 interface CustomDialogProps {
   open: boolean;
-  setOpen: (open: boolean) => void;
+  onOpenChange: (open: boolean) => void;
   title?: string;
   description?: string;
   children: ReactNode;
-  showFooter?: boolean;
-  onSubmit?: () => void;
-  showCancel?: boolean;
-  width?: boolean;
+  showHeader?: boolean;
+  className?: string;
+  contentClassName?: string;
+  maxHeight?: string;
 }
 
 export default function CustomDialog({
   open,
-  setOpen,
+  onOpenChange,
   children,
-  width = false,
+  title,
+  description,
+  showHeader = false,
+  className = "",
+  contentClassName = "",
+  maxHeight = "90vh",
 }: CustomDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={`${
-          width ? "sm:max-w-[367px]" : "sm:max-w-[511px]"
-        }  bg-white border-0 rounded-[16px] overflow-hidden max-w-[80vh] `}
+        className={cn(
+          "bg-white border-0 rounded-[16px] overflow-hidden",
+          className
+        )}
       >
-        <DialogHeader className="hidden">
-          <DialogTitle></DialogTitle>
-        </DialogHeader>
-        {/* <div className="grid gap-4 overflow-y-auto max-h-80vh">{children}</div> */}
-
-        <div className="flex flex-col min-h-0 max-h-[90vh]">
-          {/* scrollable area */}
-          <div className="overflow-y-auto  min-h-0 custom-scrollbar">
+        {showHeader && (
+          <DialogHeader>
+            {title && <DialogTitle>{title}</DialogTitle>}
+            {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          </DialogHeader>
+        )}
+        
+        <div className="flex flex-col min-h-0" style={{ maxHeight }}>
+          <div className={cn(
+            "overflow-y-auto min-h-0 custom-scrollbar",
+            contentClassName
+          )}>
             {children}
           </div>
         </div>
