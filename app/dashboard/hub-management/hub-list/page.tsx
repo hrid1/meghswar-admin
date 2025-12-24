@@ -1,6 +1,10 @@
 import { PageShell } from "@/app/dashboard/_components/PageShell";
+import HubListTable from "./_components/HubListTable";
 
 export default function Page() {
-  return <PageShell title="Hub List" description="Browse and manage hubs." />;
+  return (
+    <PageShell title="HUB List" description="Browse and manage hubs.">
+      <HubListTable />
+    </PageShell>
+  );
 }
-

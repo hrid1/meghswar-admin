@@ -1,6 +1,10 @@
-import { PageShell } from "@/app/dashboard/_components/PageShell";
+import React from 'react'
+import CreateHubForm from './_components/CreateHubForm'
 
-export default function Page() {
-  return <PageShell title="Create Hub" description="Create a new hub." />;
+export default function page() {
+  return (
+    <div>
+      <CreateHubForm/>
+    </div>
+  )
 }
-

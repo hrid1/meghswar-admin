@@ -66,6 +66,10 @@ const menuItems = [
         label: "Operator Approval",
         href: "/dashboard/hub-management/opperator-approval",
       },
+      {
+        label: "Third Party ",
+        href: "/dashboard/hub-management/third-party",
+      },
     ],
   },
 
