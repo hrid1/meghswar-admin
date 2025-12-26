@@ -1,6 +1,10 @@
 import { PageShell } from "@/app/dashboard/_components/PageShell";
+import CreateRiderForm from "./_components/CreateRiderForm";
 
 export default function Page() {
-  return <PageShell title="Create Rider" description="Create a new rider profile." />;
+  return (
+    <div>
+      <CreateRiderForm />
+    </div>
+  );
 }
-

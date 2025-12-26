@@ -6,6 +6,7 @@ export type AppButtonVariant =
   | "outline"
   | "bulk"
   | "danger"
+  | "approve"
   | "ghost";
 
 interface AppButtonProps {
@@ -37,6 +38,7 @@ export const AppButton = React.forwardRef<HTMLButtonElement, AppButtonProps>(
       outline: "border border-orange-600 text-orange-600 hover:bg-orange-50",
       bulk: "bg-orange-100 text-orange-700 hover:bg-orange-200",
       danger: "bg-red-600 text-white hover:bg-red-700",
+      approve: "bg-green-600 text-white hover:bg-green-700",
       ghost: "bg-transparent text-orange-600 hover:bg-orange-50",
     };
 
