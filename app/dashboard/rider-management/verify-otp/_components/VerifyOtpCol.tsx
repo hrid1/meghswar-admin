@@ -139,19 +139,19 @@ export const verifyOtpColumns = (opts: {
     cellClassName: "align-middle",
     render: (r) => (
       <div
-        className="flex items-center justify- gap-3"
+        className="flex items-center justify-end gap-3"
         onClick={(e) => e.stopPropagation()}
       >
         <AppButton
           variantType="approve"
-          className="bg-green-500 hover:bg-green-600 text-xs"
+          className="text-xs px-5 py-2 rounded-md"
           onClick={() => opts.onApprove(r)}
         >
           Approve
         </AppButton>
         <AppButton
           variantType="danger"
-          className="bg-red- 500 hover:bg- red-600 px-5 py-2 text-xs rounded-md"
+          className="text-xs px-5 py-2 rounded-md"
           onClick={() => opts.onDecline(r)}
         >
           Decline

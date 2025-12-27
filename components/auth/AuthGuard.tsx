@@ -36,9 +36,16 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }, [accessToken, router]);
 
   // On successful fetch, store user
+  // useEffect(() => {
+  //   if (data?.data?.user) {
+  //     dispatch(setUser(data.data.user));
+  //   }
+  // }, [data, dispatch]);
+
+   // On successful fetch, store user
   useEffect(() => {
-    if (data?.data?.user) {
-      dispatch(setUser(data.data.user));
+    if (data) {
+      dispatch(setUser(data));
     }
   }, [data, dispatch]);
 
