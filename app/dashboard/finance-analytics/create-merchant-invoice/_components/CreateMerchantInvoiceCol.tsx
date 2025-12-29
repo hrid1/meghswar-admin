@@ -105,7 +105,7 @@ export const createMerchantInvoiceColumns = (): Column<CreateMerchantInvoiceRow>
     headerClassName: "text-center",
     render: (r) => (
       <div onClick={(e) => e.stopPropagation()}>
-        <Link href={`./${encodeURIComponent(r.id)}`}>
+        <Link href={`./create-merchant-invoice/${encodeURIComponent(r.id)}`}>
           <AppButton variantType="outline" className="px-4 py-2 text-xs rounded-md">
             View
           </AppButton>

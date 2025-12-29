@@ -39,6 +39,7 @@ interface DataTableProps<T> extends RowSelectionProps<T> {
   onRowClick?: (row: T) => void;
   emptyMessage?: string;
   minWidth?: string | number;
+  cellPaddingX?: string; // Horizontal padding class (e.g., "px-2", "px-4")
 }
 
 export function DataTable<T>({
@@ -47,6 +48,7 @@ export function DataTable<T>({
   onRowClick,
   emptyMessage = "No data found",
   minWidth = "100%", // Changed from 1000px to 100%
+  cellPaddingX = "px-4", // Default horizontal padding
 
   // selection
   selectable = false,
@@ -101,28 +103,36 @@ export function DataTable<T>({
   // Calculate widths for columns
   const getColumnWidth = (col: Column<T>) => {
     if (!col.width) return "auto";
-    
+
     if (typeof col.width === "number") {
       // If it's a number, use it as pixels for small values or percentage for larger
       return col.width < 100 ? `${col.width}px` : `${col.width}%`;
     }
-    
+
     // If it's already a string with %, px, or other units, use as is
     return col.width;
   };
 
   const renderHeaderCells = () =>
-    columns.map((col) => (
-      <th
-        key={String(col.key)}
-        style={{ width: getColumnWidth(col) }}
-        className={`px-4 py-3 text-left text-sm text-white whitespace-nowrap ${
-          col.headerClassName ?? ""
-        }`}
-      >
-        {col.header}
-      </th>
-    ));
+    columns.map((col) => {
+      const headerClass = col.headerClassName ?? "";
+      // Check for alignment overrides. 'text-center' or 'text-right'
+      // If neither is present, default to 'text-left'
+      const alignClass =
+        headerClass.includes("text-center") || headerClass.includes("text-right")
+          ? ""
+          : "text-left";
+
+      return (
+        <th
+          key={String(col.key)}
+          style={{ width: getColumnWidth(col) }}
+          className={`${cellPaddingX} py-3 ${alignClass} text-sm text-white whitespace-nowrap ${headerClass}`}
+        >
+          {col.header}
+        </th>
+      );
+    });
 
   const renderRowCells = (row: T, index: number) =>
     columns.map((col) => {
@@ -132,9 +142,8 @@ export function DataTable<T>({
       return (
         <td
           key={String(col.key)}
-          className={`px-4 py-3 text-sm ${wrapClass} ${
-            col.cellClassName ?? ""
-          }`}
+          className={`${cellPaddingX} py-3 text-sm ${wrapClass} ${col.cellClassName ?? ""
+            }`}
           style={{ width: getColumnWidth(col) }}
         >
           {col.render ? col.render(row) : (row as any)[col.key]}
@@ -185,9 +194,8 @@ export function DataTable<T>({
                 <tr
                   key={String(rowId)}
                   onClick={() => onRowClick?.(row)}
-                  className={`border-t border-[#E4E4E4] ${
-                    onRowClick ? "hover:bg-[#1D1D1D]/1 cursor-pointer" : ""
-                  }`}
+                  className={`border-t border-[#E4E4E4] ${onRowClick ? "hover:bg-[#1D1D1D]/1 cursor-pointer" : ""
+                    }`}
                 >
                   {/* Row checkbox - fixed small width */}
                   {selectable && (

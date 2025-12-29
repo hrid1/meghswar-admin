@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -30,7 +30,7 @@ const menuItems = [
     children: [
       { label: "All Parcel", href: "/dashboard/parcel-management/all-parcel" },
       { label: "Receive Parcel", href: "/dashboard/parcel-management/receive-parcel" },
-     
+
       {
         label: "Unprocessed",
         href: "/dashboard/parcel-management/unprocessed",
@@ -52,7 +52,7 @@ const menuItems = [
         label: "Parcel History",
         href: "/dashboard/parcel-management/parcel-history",
       },
-     
+
     ],
   },
   {
@@ -204,7 +204,7 @@ const menuItems = [
     children: [{ label: "Report", href: "/dashboard/manage-operators/report" }],
   },
 
- 
+
 ];
 
 interface SidebarProps {
@@ -225,6 +225,17 @@ export function Sidebar({
   const dispatch = useAppDispatch();
   const router = useRouter();
 
+  // Auto-expand parent menu item on initial load/navigation if a child is active
+  useEffect(() => {
+    menuItems.forEach((item) => {
+      if (item.children && isChildActive(item.children)) {
+        setExpandedItems((prev) =>
+          prev.includes(item.href) ? prev : [...prev, item.href]
+        );
+      }
+    });
+  }, [pathname]);
+
   const toggleExpand = (href: string) => {
     if (collapsed) {
       setCollapsed(false);
@@ -242,9 +253,15 @@ export function Sidebar({
     );
   };
 
-  const isActive = (href: string) => pathname === href;
+  const checkActive = (href: string) => {
+    if (pathname === href) return true;
+    if (href === "/dashboard") return pathname === "/dashboard";
+    return pathname.startsWith(href + "/");
+  };
+
+  const isActive = (href: string) => checkActive(href);
   const isChildActive = (children?: { href: string }[]) =>
-    children?.some((child) => pathname.startsWith(child.href));
+    children?.some((child) => checkActive(child.href));
 
   const handleLogout = () => {
     dispatch(logOut());
@@ -255,9 +272,8 @@ export function Sidebar({
     <>
       <div
         onClick={onClose}
-        className={`fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 transition-opacity duration-300 md:hidden ${
-          open ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 transition-opacity duration-300 md:hidden ${open ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
       />
 
       <aside
@@ -279,10 +295,9 @@ export function Sidebar({
               const itemClasses = `
                 relative flex items-center w-full p-2 py-3 rounded-xl transition-all duration-200 group
                 ${collapsed ? "justify-center" : "justify-between"}
-                ${
-                  active || hasActiveChild
-                    ? "bg-orange-50 text-orange-600"
-                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                ${active || hasActiveChild
+                  ? "bg-orange-50 text-orange-600"
+                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                 }
               `;
 
@@ -300,19 +315,17 @@ export function Sidebar({
                       className={itemClasses}
                     >
                       <div
-                        className={`flex items-center ${
-                          collapsed ? "justify-center w-full" : "gap-3"
-                        }`}
+                        className={`flex items-center ${collapsed ? "justify-center w-full" : "gap-3"
+                          }`}
                       >
                         <item.icon
                           className={`
                            ${collapsed ? "w-6 h-6" : "w-5 h-5"} 
                            shrink-0 transition-colors 
-                           ${
-                             hasActiveChild
-                               ? "text-orange-600"
-                               : "text-gray-400 group-hover:text-gray-600"
-                           }
+                           ${hasActiveChild
+                              ? "text-orange-600"
+                              : "text-gray-400 group-hover:text-gray-600"
+                            }
                          `}
                         />
 
@@ -325,28 +338,25 @@ export function Sidebar({
 
                       {!collapsed && (
                         <ChevronDown
-                          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-                            isExpanded ? "rotate-180" : ""
-                          }`}
+                          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""
+                            }`}
                         />
                       )}
                     </button>
                   ) : (
                     <Link href={item.href} className={itemClasses}>
                       <div
-                        className={`flex items-center ${
-                          collapsed ? "justify-center w-full" : "gap-3"
-                        }`}
+                        className={`flex items-center ${collapsed ? "justify-center w-full" : "gap-3"
+                          }`}
                       >
                         <item.icon
                           className={`
                            ${collapsed ? "w-6 h-6" : "w-5 h-5"} 
                            shrink-0 transition-colors
-                           ${
-                             active
-                               ? "text-orange-600"
-                               : "text-gray-400 group-hover:text-gray-600"
-                           }
+                           ${active
+                              ? "text-orange-600"
+                              : "text-gray-400 group-hover:text-gray-600"
+                            }
                          `}
                         />
 
@@ -362,11 +372,10 @@ export function Sidebar({
                   <div
                     className={`
                     overflow-hidden transition-all duration-300 ease-in-out
-                    ${
-                      !collapsed && isExpanded
+                    ${!collapsed && isExpanded
                         ? "max-h-125 opacity-100 mt-1"
                         : "max-h-0 opacity-0"
-                    }
+                      }
                   `}
                   >
                     {item.children && (
@@ -377,17 +386,16 @@ export function Sidebar({
                             href={child.href}
                             className={`
                               block px-3 py-2 text-sm rounded-lg transition-colors border truncate
-                              ${
-                                isActive(child.href)
-                                  ? "text-orange-600 bg-orange-50 font-medium"
-                                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                              ${isActive(child.href)
+                                ? "text-orange-600 bg-orange-50 font-medium"
+                                : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
                               }
                             `}
                           >
                             {child.label}
                           </Link>
                         ))}
-                       
+
                       </div>
                     )}
                   </div>
@@ -397,9 +405,8 @@ export function Sidebar({
           </div>
 
           <div
-            className={`p-2 border-t border-gray-100 ${
-              collapsed ? "flex justify-center" : ""
-            }`}
+            className={`p-2 border-t border-gray-100 ${collapsed ? "flex justify-center" : ""
+              }`}
           >
             <button
               onClick={handleLogout}

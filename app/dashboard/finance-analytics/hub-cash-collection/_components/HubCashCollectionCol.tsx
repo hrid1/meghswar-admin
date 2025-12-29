@@ -129,7 +129,7 @@ export const hubCashCollectionColumns = (opts: {
     cellClassName: "align-middle text-center",
     render: (r) => (
       <div onClick={(e) => e.stopPropagation()}>
-        <Link href={`./${encodeURIComponent(r.id)}`}>
+        <Link href={`./hub-cash-collection/${encodeURIComponent(r.id)}`}>
           <AppButton variantType="outline" className="px-4 py-2 text-xs rounded-md">
             View
           </AppButton>
