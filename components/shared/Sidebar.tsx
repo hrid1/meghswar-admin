@@ -132,6 +132,10 @@ const menuItems = [
     href: "/dashboard/finance-analytics",
     children: [
       {
+        label: "Finance Overview",
+        href: "/dashboard/finance-analytics/finance-overview",
+      },
+      {
         label: "Create Merch. Invoice",
         href: "/dashboard/finance-analytics/create-merchant-invoice",
       },
