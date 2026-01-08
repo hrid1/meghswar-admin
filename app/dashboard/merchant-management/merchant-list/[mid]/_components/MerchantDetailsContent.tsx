@@ -6,10 +6,18 @@ import MerchantHeaderCard from "./MerchantHeaderCard";
 import MerchantStatsCards from "./MerchantStatsCards";
 import ParcelFlowChart, { type ParcelPoint } from "./ParcelFlowChart";
 import StoresSection from "./StoresSection";
+import {  useGetMerchantByIdQuery } from "@/redux/features/merchant/merchnatApi";
 
 export default function MerchantDetailsContent() {
   const params = useParams<{ mid: string }>();
   const merchantId = params?.mid ?? "";
+
+  const { data: merchantData } = useGetMerchantByIdQuery({ id: merchantId });
+
+  console.log(merchantData);
+  if (!merchantData) return <div>Loading...</div>;
+
+  const merchant = merchantData.data.merchant;
 
   const [period, setPeriod] = useState<"weekly" | "monthly">("weekly");
   const [month, setMonth] = useState("april");

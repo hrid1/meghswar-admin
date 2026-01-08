@@ -12,9 +12,13 @@ import { Button } from "@/components/ui/button";
 
 type RowId = string | number;
 
+import HubDetailsModal from "./HubDetailsModal";
+
 export default function PayoutHistoryTable() {
     const [selectedIds, setSelectedIds] = useState<RowId[]>([]);
     const [search, setSearch] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedRow, setSelectedRow] = useState<PayoutHistoryRow | null>(null);
 
     const filteredRows = useMemo(() => {
         const q = search.trim().toLowerCase();
@@ -34,7 +38,12 @@ export default function PayoutHistoryTable() {
         [selectedIds, visibleIds]
     );
 
-    const columns = useMemo(() => payoutHistoryColumns(), []);
+    const handleViewDetails = (row: PayoutHistoryRow) => {
+        setSelectedRow(row);
+        setIsModalOpen(true);
+    };
+
+    const columns = useMemo(() => payoutHistoryColumns(handleViewDetails), []);
 
     return (
         <div className="space-y-4">
@@ -102,6 +111,12 @@ export default function PayoutHistoryTable() {
                     onToggleAll={(nextSelected) => setSelectedIds(nextSelected)}
                 />
             </div>
+
+            <HubDetailsModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                data={selectedRow}
+            />
         </div>
     );
 }

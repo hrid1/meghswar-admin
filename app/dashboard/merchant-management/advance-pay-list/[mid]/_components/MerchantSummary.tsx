@@ -3,13 +3,13 @@
 import React from "react";
 
 interface MerchantSummaryProps {
-  mid: string;
+  merchantId: string;
   advanceEnabled: boolean;
   onAdvanceToggle: (enabled: boolean) => void;
 }
 
 export default function MerchantSummary({
-  mid,
+  merchantId,
   advanceEnabled,
   onAdvanceToggle,
 }: MerchantSummaryProps) {
@@ -67,7 +67,7 @@ export default function MerchantSummary({
               </label>
             </div>
             <p className="text-[11px] text-gray-400 sm:text-right">
-              Merchant ID: <span className="font-medium">{mid}</span>
+              Merchant ID: <span className="font-medium">{merchantId}</span>
             </p>
           </div>
         </div>

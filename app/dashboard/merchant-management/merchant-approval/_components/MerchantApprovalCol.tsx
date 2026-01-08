@@ -111,12 +111,12 @@ export const merchantApprovalColumns = (): Column<MerchantApprovalRow>[] => [
     cellClassName: "align-middle",
     render: (row) => (
       <div className="flex" onClick={(e) => e.stopPropagation()}>
-        <Link href={`/dashboard/merchant-management/merchant-approval/${encodeURIComponent(row.aid)}`}>
+        <Link href={`/dashboard/merchant-management/merchant-approval/${(row.userId)}`}>
           <AppButton
             variantType="primary"
             className="bg-[#FE5000] hover:bg-[#FE5000]/90 px-6"
           >
-            View Details
+            View Detailss
           </AppButton>
         </Link>
       </div>

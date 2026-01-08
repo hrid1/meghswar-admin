@@ -44,7 +44,7 @@ export default function CustomDialog({
             {description && <p className="text-sm text-muted-foreground">{description}</p>}
           </DialogHeader>
         )}
-        
+
         <div className="flex flex-col min-h-0" style={{ maxHeight }}>
           <div className={cn(
             "overflow-y-auto min-h-0 custom-scrollbar",

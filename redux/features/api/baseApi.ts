@@ -8,6 +8,7 @@ import {
 } from "@reduxjs/toolkit/query/react";
 import { RootState } from "@/redux/store";
 import { setTokens, logOut } from "../auth/authSlice";
+import { tagTypes } from "../tagList";
 
 /**
  * Base query with automatic token refresh on 401 errors
@@ -120,6 +121,6 @@ const baseQueryWithReauth: BaseQueryFn<
 export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Post", "Riders"],
+  tagTypes: tagTypes as unknown as string[],
   endpoints: () => ({}),
 });

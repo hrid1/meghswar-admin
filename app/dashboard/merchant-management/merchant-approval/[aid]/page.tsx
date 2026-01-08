@@ -1,13 +1,14 @@
 import { PageShell } from "@/app/dashboard/_components/PageShell";
 import MerchantApprovalDetailsContent from "./_components/MerchantApprovalDetailsContent";
 
-export default function Page({ params }: { params: { aid: string } }) {
+export default async function Page({ params }: { params: Promise<{ aid: string }> }) {
+  const { aid } = await params; 
   return (
     <PageShell
       title="Merchant Approval Details"
       description="Merchant Management › Merchant Account"
     >
-      <MerchantApprovalDetailsContent aid={params.aid} />
+      <MerchantApprovalDetailsContent aid={aid} />
     </PageShell>
   );
 }

@@ -8,6 +8,7 @@ import { exportRowsToCsv, type ExportRow } from "@/lib/exportCsv";
 
 import { merchantListColumns } from "./MerchantListCol";
 import { merchantListFakeData, type MerchantListRow } from "./fakeData";
+import { useGetMerchantsQuery } from "@/redux/features/merchant/merchnatApi";
 
 type RowId = string | number;
 
@@ -45,8 +46,22 @@ export default function MerchantListTable() {
       advancePayment: r.advancePayment,
     }));
     exportRowsToCsv(exportRows, "merchant_list_export.csv");
+
+
+    
   };
 
+
+  const { data, isLoading, error } = useGetMerchantsQuery({
+    status: "",
+    district: "",
+    page: 1,
+    limit: 10,
+  });
+
+  const merchants = data?.data?.merchants ?? [];
+  console.log(merchants);
+  if(isLoading) return <div>Loading...</div>;
   return (
     <div className="space-y-4 bg-white">
       {/* Top bar */}

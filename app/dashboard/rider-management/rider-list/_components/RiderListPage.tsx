@@ -27,6 +27,8 @@ export default function RiderListPage() {
     search,
   });
 
+ 
+
   const riders = data?.data?.riders ?? [];
   const columns = useMemo(() => riderColumns(), []);
 

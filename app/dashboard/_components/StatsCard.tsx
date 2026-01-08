@@ -13,7 +13,7 @@ const statusColors: any = {
 export default function StatsCard() {
   return (
     <div>
-      <section className=" grid grid-cols-4 gap-6">
+      <section className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <ParcelCard
           number={30}
           subText="+7 in last 3 hours"

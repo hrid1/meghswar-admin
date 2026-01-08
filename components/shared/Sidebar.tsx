@@ -377,7 +377,7 @@ export function Sidebar({
                     className={`
                     overflow-hidden transition-all duration-300 ease-in-out
                     ${!collapsed && isExpanded
-                        ? "max-h-125 opacity-100 mt-1"
+                        ? "max-h-[800px] opacity-100 mt-1"
                         : "max-h-0 opacity-0"
                       }
                   `}

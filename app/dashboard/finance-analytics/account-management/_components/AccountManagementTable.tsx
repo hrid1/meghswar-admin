@@ -10,9 +10,23 @@ import { accountFakeData, type AccountRow } from "./fakeData";
 
 type RowId = string | number;
 
+import CreateAccountModal from "./CreateAccountModal";
+import ViewStatementModal from "./ViewStatementModal";
+import BalanceTransferModal from "./BalanceTransferModal";
+
 export default function AccountManagementTable() {
     const [selectedIds, setSelectedIds] = useState<RowId[]>([]);
     const [search, setSearch] = useState("");
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+    // View Statement Modal State
+    const [isViewStatementModalOpen, setIsViewStatementModalOpen] = useState(false);
+    const [selectedStatementRow, setSelectedStatementRow] = useState<AccountRow | undefined>(undefined);
+
+    // Balance Transfer Modal State
+    const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+    const [transferSourceRow, setTransferSourceRow] = useState<AccountRow | undefined>(undefined);
+
 
     const filteredRows = useMemo(() => {
         const q = search.trim().toLowerCase();
@@ -33,7 +47,17 @@ export default function AccountManagementTable() {
         [selectedIds, visibleIds]
     );
 
-    const columns = useMemo(() => accountManagementColumns(), []);
+    const handleViewStatement = (row: AccountRow) => {
+        setSelectedStatementRow(row);
+        setIsViewStatementModalOpen(true);
+    };
+
+    const handleBalanceTransfer = (row: AccountRow) => {
+        setTransferSourceRow(row);
+        setIsTransferModalOpen(true);
+    };
+
+    const columns = useMemo(() => accountManagementColumns(handleViewStatement, handleBalanceTransfer), []);
 
     return (
         <div className="space-y-6">
@@ -64,7 +88,7 @@ export default function AccountManagementTable() {
                 <AppButton
                     variantType="primary"
                     className="px-10 py-3 rounded-lg bg-[#FE5000] hover:bg-[#FE5000]/90 text-white font-bold shadow-lg shadow-orange-200"
-                    onClick={() => { }}
+                    onClick={() => setIsCreateModalOpen(true)}
                 >
                     Create Account
                 </AppButton>
@@ -89,6 +113,23 @@ export default function AccountManagementTable() {
                     onToggleAll={(nextSelected) => setSelectedIds(nextSelected)}
                 />
             </div>
+
+            <CreateAccountModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+            />
+
+            <ViewStatementModal
+                isOpen={isViewStatementModalOpen}
+                onClose={() => setIsViewStatementModalOpen(false)}
+                account={selectedStatementRow}
+            />
+
+            <BalanceTransferModal
+                isOpen={isTransferModalOpen}
+                onClose={() => setIsTransferModalOpen(false)}
+                sourceAccount={transferSourceRow}
+            />
         </div>
     );
 }

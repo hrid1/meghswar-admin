@@ -152,7 +152,7 @@ export function DataTable<T>({
     });
 
   return (
-    <div className="overflow-x-auto border border-[#E4E4E4] rounded-t-lg">
+    <div className="overflow-x-auto border border-[#E4E4E4] rounded-t-lg custom-scrollbar">
       <table className="w-full" style={{ minWidth }}>
         <thead className="bg-[#FE5000]">
           <tr>

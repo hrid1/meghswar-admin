@@ -11,16 +11,16 @@ export default function DashboardContent() {
   return (
     <div className="mt-5 space-y-6">
       <StatsCard />
-      <div className="flex gap-4">
-        <div className="w-full md:w-[60%] border border-gray-200 rounded-2xl p-4">
+      <div className="flex flex-col xl:flex-row gap-4">
+        <div className="w-full xl:w-[60%] border border-gray-200 rounded-2xl p-4">
           <SummaryForToday />
         </div>
-        <div className="w-full md:w-[40%] border border-gray-200 rounded-2xl p-4">
+        <div className="w-full xl:w-[40%] border border-gray-200 rounded-2xl p-4">
           <QuickActions />
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-col xl:flex-row gap-4">
         <div className="flex-1">
           <ParcelFlow />
         </div>

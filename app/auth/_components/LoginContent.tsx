@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
-import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck, User } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useLoginMutation } from "@/redux/features/api/authApi";
@@ -25,12 +25,15 @@ export default function LoginContent() {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     defaultValues: {
-      identifier: "john.admin@courier.com",
-      password: "AdminPass123",
+      identifier: "+8801700000001",
+      password: "Admin123!",
       rememberMe: true,
     },
   });
 
+
+  // { "identifier": "+8801700000001",
+  //   "password": "Admin123!"}
   const router = useRouter();
   const dispatch = useAppDispatch();
   const accessToken = useAppSelector((state) => state.auth.access_token);
@@ -123,14 +126,14 @@ export default function LoginContent() {
             >
               <label className="space-y-2 text-sm block">
                 <span className="flex items-center gap-2 text-slate-700">
-                  <Mail className="h-4 w-4 text-amber-500" />
-                  Work email
+                  <User className="h-4 w-4 text-amber-500" />
+                  Email or Phone Number
                 </span>
                 <Input
-                  type="email"
-                  placeholder="ops@meghswar.com"
+                  type="text"
+                  placeholder="ops@meghswar.com or +8801700000001"
                   className="border-slate-200 bg-white text-slate-900 placeholder:text-slate-400"
-                  {...register("identifier", { required: "Email is required" })}
+                  {...register("identifier", { required: "Email or phone number is required" })}
                   aria-invalid={errors.identifier ? "true" : "false"}
                 />
                 {errors.identifier ? (

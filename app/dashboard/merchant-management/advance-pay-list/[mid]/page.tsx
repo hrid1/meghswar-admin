@@ -13,7 +13,7 @@ export default async function Page({
       title="View Details"
       description="Merchant Management > Advance Payment List > View Details"
     >
-      <AdvancePayDetails mid={mid} />
+      <AdvancePayDetails merchantId={mid} />
     </PageShell>
   );
 }

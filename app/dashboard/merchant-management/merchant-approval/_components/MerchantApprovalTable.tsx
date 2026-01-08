@@ -9,19 +9,57 @@ import { exportRowsToCsv, type ExportRow } from "@/lib/exportCsv";
 import { AppButton } from "@/components/reusable/CustomButton";
 
 import { merchantApprovalColumns, type MerchantApprovalRow } from "./MerchantApprovalCol";
-import { merchantApprovalFakeData } from "./fakeData";
+import { useGetMerchantsQuery } from "@/redux/features/merchant/merchnatApi";
+import formatDate from "@/lib/formateDate";
 
 type RowId = string | number;
 
+
+
+// Map API response to MerchantApprovalRow format
+const mapApiDataToRow = (apiMerchant: any): MerchantApprovalRow => {
+  // Construct address from thana and district
+  const addressParts = [apiMerchant.thana, apiMerchant.district].filter(Boolean);
+  const address = addressParts.length > 0 ? addressParts.join(", ") : "N/A";
+  
+  return {
+    aid: `${apiMerchant.id}-create`, // Using merchant ID with "-create" suffix
+    userId: apiMerchant.id, // Using merchant ID as userId
+    merchant: {
+      name: apiMerchant.full_name || "N/A",
+      phone: apiMerchant.phone || "N/A",
+    },
+    requestedFor: {
+      title: "Create Account", // Default title for pending merchants
+      status: (apiMerchant.status?.toLowerCase() || "pending") as "pending" | "approved" | "rejected",
+    },
+    requestedAt: formatDate(apiMerchant.created_at || new Date().toISOString()),
+    address: address,
+  };
+};
+
 export default function MerchantApprovalTable() {
+  const { data, isLoading, error } = useGetMerchantsQuery({
+    status: "PENDING",
+    district: "",
+    page: 1,
+    limit: 10,
+  });
+
   const [selectedIds, setSelectedIds] = useState<RowId[]>([]);
   const [search, setSearch] = useState("");
 
+  // Transform API data to MerchantApprovalRow format
+  const apiRows = useMemo(() => {
+    if (!data?.data?.merchants) return [];
+    return data.data.merchants.map(mapApiDataToRow);
+  }, [data]);
+
   const filteredRows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return merchantApprovalFakeData;
+    if (!q) return apiRows;
 
-    return merchantApprovalFakeData.filter((r) => {
+    return apiRows.filter((r: MerchantApprovalRow) => {
       return (
         r.userId.toLowerCase().includes(q) ||
         r.merchant.name.toLowerCase().includes(q) ||
@@ -30,9 +68,9 @@ export default function MerchantApprovalTable() {
         r.address.toLowerCase().includes(q)
       );
     });
-  }, [search]);
+  }, [apiRows, search]);
 
-  const visibleIds = useMemo(() => filteredRows.map((r) => r.userId), [filteredRows]);
+  const visibleIds = useMemo(() => filteredRows.map((r: MerchantApprovalRow) => r.userId), [filteredRows]);
 
   const cleanedSelectedIds = useMemo(
     () => selectedIds.filter((id) => visibleIds.includes(String(id))),
@@ -41,14 +79,14 @@ export default function MerchantApprovalTable() {
 
   const selectedRows = useMemo(() => {
     const set = new Set(cleanedSelectedIds.map(String));
-    return filteredRows.filter((r) => set.has(String(r.userId)));
+    return filteredRows.filter((r: MerchantApprovalRow) => set.has(String(r.userId)));
   }, [filteredRows, cleanedSelectedIds]);
 
   const columns = useMemo(() => merchantApprovalColumns(), []);
 
   const handleExport = () => {
     const rowsToExport = selectedRows.length > 0 ? selectedRows : filteredRows;
-    const exportRows: ExportRow[] = rowsToExport.map((r) => ({
+    const exportRows: ExportRow[] = rowsToExport.map((r: MerchantApprovalRow) => ({
       userId: r.userId,
       merchantName: r.merchant.name,
       merchantPhone: r.merchant.phone,
@@ -59,6 +97,10 @@ export default function MerchantApprovalTable() {
     }));
     exportRowsToCsv(exportRows, "merchant_account_approvals_export.csv");
   };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading merchants</div>;
+  if (!data?.data?.merchants || apiRows.length === 0) return <div>No merchants found</div>;
 
   return (
     <div className="space-y-4 bg-white">

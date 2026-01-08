@@ -7,6 +7,7 @@ import ParcelFlowChart from "./ParcelFlowChart";
 import StoreListTab from "./StoreListTab";
 import ParcelListTab from "./ParcelListTab";
 import CustomTabs from "@/components/reusable/CustomTab";
+import { useGetMerchantByIdQuery } from "@/redux/features/merchant/merchnatApi";
 
 type FlowPoint = { day: string; value: number };
 
@@ -31,7 +32,13 @@ interface Parcel {
   updatedAt: string;
 }
 
-export default function AdvancePayDetails({ mid }: { mid: string }) {
+export default function AdvancePayDetails({ merchantId }: { merchantId: string }) {
+  const { data: merchantData } = useGetMerchantByIdQuery({ id: merchantId });
+  console.log(merchantData);
+  if (!merchantData) return <div>Loading...</div>;
+
+  const merchant = merchantData.data.merchant;
+
   const [advanceEnabled, setAdvanceEnabled] = useState(true);
   const [storeQuery, setStoreQuery] = useState("");
 
@@ -104,7 +111,7 @@ export default function AdvancePayDetails({ mid }: { mid: string }) {
   return (
     <div className="space-y-6">
       <MerchantSummary
-        mid={mid}
+        merchantId={merchantId}
         advanceEnabled={advanceEnabled}
         onAdvanceToggle={setAdvanceEnabled}
       />
