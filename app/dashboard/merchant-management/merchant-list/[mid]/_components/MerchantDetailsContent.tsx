@@ -12,12 +12,7 @@ export default function MerchantDetailsContent() {
   const params = useParams<{ mid: string }>();
   const merchantId = params?.mid ?? "";
 
-  const { data: merchantData } = useGetMerchantByIdQuery({ id: merchantId });
-
-  console.log(merchantData);
-  if (!merchantData) return <div>Loading...</div>;
-
-  const merchant = merchantData.data.merchant;
+  const { data: merchantData, isLoading } = useGetMerchantByIdQuery({ id: merchantId });
 
   const [period, setPeriod] = useState<"weekly" | "monthly">("weekly");
   const [month, setMonth] = useState("april");
@@ -41,6 +36,12 @@ export default function MerchantDetailsContent() {
       { name: "Fri", parcels: 6000 },
     ];
   }, [period, month]);
+
+  console.log(merchantData);
+  if (isLoading) return <div>Loading...</div>;
+  if (!merchantData) return <div>No data found</div>;
+
+  const merchant = merchantData.data.merchant;
 
   return (
     <div className="space-y-6">

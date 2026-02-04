@@ -1,4 +1,5 @@
 export const  TAG_TYPES = {
+    Hubs: "Hubs" ,
     Merchants: "Merchants" ,
     Riders: "Riders" ,
     Posts: "Posts" ,

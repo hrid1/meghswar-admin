@@ -7,7 +7,7 @@ import { Download } from "lucide-react";
 import { exportRowsToCsv, type ExportRow } from "@/lib/exportCsv";
 
 import { merchantListColumns } from "./MerchantListCol";
-import { merchantListFakeData, type MerchantListRow } from "./fakeData";
+import { formateResponse, merchantListFakeData, type MerchantListRow } from "./fakeData";
 import { useGetMerchantsQuery } from "@/redux/features/merchant/merchnatApi";
 
 type RowId = string | number;
@@ -58,10 +58,14 @@ export default function MerchantListTable() {
     page: 1,
     limit: 10,
   });
+  if(isLoading) return <div>Loading...</div>;
 
   const merchants = data?.data?.merchants ?? [];
   console.log(merchants);
-  if(isLoading) return <div>Loading...</div>;
+
+  const formateMerchatsData = formateResponse(merchants);
+  console.log("this is formateMerchatsData", formateMerchatsData)
+  
   return (
     <div className="space-y-4 bg-white">
       {/* Top bar */}
@@ -123,9 +127,9 @@ export default function MerchantListTable() {
         </div>
       </div>
 
-      <DataTable<MerchantListRow>
+      <DataTable<any>
         columns={columns}
-        data={filteredRows}
+        data={formateMerchatsData}
         selectable
         minWidth={1200}
         getRowId={(row) => row.id}

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { DataTable } from "@/components/reusable/DataTable";
-import { useGetRidersQuery } from "@/redux/features/api/riders/rider.api";
+import { useGetRidersQuery } from "@/redux/features/riders/rider.api";
 import { riderColumns } from "./RiderColumns";
 import { Rider } from "../types";
 import CustomPagination from "@/components/reusable/CustomPagination";

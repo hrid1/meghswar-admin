@@ -10,6 +10,8 @@ import { Download } from "lucide-react";
 
 import { hubListColumns } from "./HubListCol";
 import { mockHubList, type HubListRow } from "./fakeData";
+import CustomModal from "@/components/reusable/CustomModal";
+import CreateHubForm from "../../create-hub/_components/CreateHubForm";
 
 type RowId = string | number;
 type FilterBy = "area";
@@ -19,6 +21,7 @@ export default function HubListTable() {
   const [selectedIds, setSelectedIds] = useState<RowId[]>([]);
   const [filterBy, setFilterBy] = useState<FilterBy>("area");
   const [search, setSearch] = useState("");
+  const [isCreateHubModalOpen, setIsCreateHubModalOpen] = useState(false);
 
   const filteredRows = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -99,7 +102,7 @@ export default function HubListTable() {
           <AppButton
             variantType="primary"
             className="px-10 py-3 rounded-lg bg-[#FE5000] hover:bg-[#FE5000]/90"
-            onClick={() => console.log("Create HUB")}
+            onClick={() => setIsCreateHubModalOpen(true)}
           >
             Create HUB
           </AppButton>
@@ -177,7 +180,22 @@ export default function HubListTable() {
         }}
         onToggleAll={(nextSelected) => setSelectedIds(nextSelected)}
       />
+
+      {/* Create Hub Modal */}
+      <CustomModal
+        isOpen={isCreateHubModalOpen}
+        onClose={() => setIsCreateHubModalOpen(false)}
+        title="Create HUB"
+        description="Fill in the details to create a new hub"
+        className="max-w-5xl max-h-[90vh] overflow-y-auto"
+      >
+        <CreateHubForm
+          onSuccess={() => {
+            setIsCreateHubModalOpen(false);
+            // TODO: Refresh the hub list or add the new hub to the list
+          }}
+        />
+      </CustomModal>
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-import { useGetRiderByIdQuery } from "@/redux/features/api/riders/rider.api";
+import { useGetRiderByIdQuery } from "@/redux/features/riders/rider.api";
 import React from "react";
 
 interface Props {

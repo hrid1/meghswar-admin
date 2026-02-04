@@ -4,6 +4,7 @@ import React from "react";
 import type { Column } from "@/components/reusable/DataTable";
 import type { MerchantStoreRow } from "./storeFakeData";
 import { Eye, Pencil, Trash2 } from "lucide-react";
+import Link from "next/link";
 
 function StatusPill({ status }: { status: MerchantStoreRow["status"] }) {
   const cls =
@@ -11,16 +12,20 @@ function StatusPill({ status }: { status: MerchantStoreRow["status"] }) {
       ? "bg-green-100 text-green-700"
       : "bg-gray-200 text-gray-600";
   return (
-    <span className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold ${cls}`}>
+    <span
+      className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold ${cls}`}
+    >
       {status}
     </span>
   );
 }
 
 export const storesColumns = (opts: {
+  mid?: string;
   onView: (row: MerchantStoreRow) => void;
   onEdit: (row: MerchantStoreRow) => void;
   onDelete: (row: MerchantStoreRow) => void;
+  onAssign: (row: MerchantStoreRow) => void;
 }): Column<MerchantStoreRow>[] => [
   {
     key: "id",
@@ -34,7 +39,9 @@ export const storesColumns = (opts: {
     header: "Store Name",
     width: "16%",
     cellClassName: "align-middle",
-    render: (r) => <span className="text-sm font-semibold text-gray-900">{r.storeName}</span>,
+    render: (r) => (
+      <span className="text-sm font-semibold text-gray-900">{r.storeName}</span>
+    ),
   },
   {
     key: "phone",
@@ -49,7 +56,9 @@ export const storesColumns = (opts: {
     width: "22%",
     wrap: true,
     cellClassName: "align-middle",
-    render: (r) => <span className="text-xs text-gray-600 leading-5">{r.storeAddress}</span>,
+    render: (r) => (
+      <span className="text-xs text-gray-600 leading-5">{r.storeAddress}</span>
+    ),
   },
   {
     key: "performance",
@@ -99,14 +108,25 @@ export const storesColumns = (opts: {
         className="flex items-center justify-center gap-3 text-gray-500"
         onClick={(e) => e.stopPropagation()}
       >
-        <button
+        {/* <button
           type="button"
           className="hover:text-[#FE5000] transition-colors"
           title="View"
           onClick={() => opts.onView(r)}
         >
           <Eye className="h-4 w-4" />
-        </button>
+        </button> */}
+
+        <Link
+          href={
+            opts.mid
+              ? `/dashboard/merchant-management/merchant-list/${opts.mid}/store/${r.id}`
+              : `store/${r.id}`
+          }
+          className=""
+        >
+          <Eye className="h-4 w-4" />
+        </Link>
         <button
           type="button"
           className="hover:text-[#FE5000] transition-colors"
@@ -117,14 +137,16 @@ export const storesColumns = (opts: {
         </button>
         <button
           type="button"
-          className="hover:text-red-500 transition-colors"
-          title="Delete"
-          onClick={() => opts.onDelete(r)}
+          className="hover:text-red-500 transition-colors bg-amber-500 text-white p-1 rounded"
+          title="Assign Hub"
+          onClick={() => opts.onAssign(r)}
         >
-          <Trash2 className="h-4 w-4" />
+          Assign Hub
         </button>
+
+        
+     
       </div>
     ),
   },
 ];
-

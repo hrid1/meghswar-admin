@@ -44,6 +44,7 @@ interface DataTableProps<T> extends RowSelectionProps<T> {
 
 export function DataTable<T>({
   columns,
+  
   data,
   onRowClick,
   emptyMessage = "No data found",
@@ -70,16 +71,16 @@ export function DataTable<T>({
   const allRowIds = useMemo(() => {
     if (!selectable) return [];
     return data
-      .filter((row) => (isRowSelectable ? isRowSelectable(row) : true))
-      .map((row, idx) => resolvedGetRowId(row, idx));
+      ?.filter((row) => (isRowSelectable ? isRowSelectable(row) : true))
+      ?.map((row, idx) => resolvedGetRowId(row, idx));
   }, [data, selectable, isRowSelectable, resolvedGetRowId]);
 
   const selectedSet = useMemo(() => new Set(selectedRowIds), [selectedRowIds]);
 
   const allSelected =
     selectable &&
-    allRowIds.length > 0 &&
-    allRowIds.every((id) => selectedSet.has(id));
+    allRowIds?.length > 0 &&
+    allRowIds?.every((id) => selectedSet.has(id));
   const noneSelected = !selectable || selectedRowIds.length === 0;
   const someSelected = selectable && !noneSelected && !allSelected;
 
@@ -175,7 +176,7 @@ export function DataTable<T>({
         </thead>
 
         <tbody>
-          {data.length === 0 ? (
+          {data?.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length + (selectable ? 1 : 0)}
@@ -185,7 +186,7 @@ export function DataTable<T>({
               </td>
             </tr>
           ) : (
-            data.map((row, index) => {
+            data?.map((row, index) => {
               const rowId = resolvedGetRowId(row, index);
               const disabled = isRowSelectable ? !isRowSelectable(row) : false;
               const checked = selectedSet.has(rowId);

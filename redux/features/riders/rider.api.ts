@@ -1,5 +1,5 @@
 import { GetRidersResponse, Rider } from "@/app/dashboard/rider-management/rider-list/types";
-import { baseApi } from "../baseApi";
+import { baseApi } from "../api/baseApi";
 
 
 export interface GetRidersArgs {

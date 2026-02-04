@@ -3,6 +3,7 @@
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { Header } from "@/components/shared/Header";
 import { Sidebar } from "@/components/shared/Sidebar";
+import { Toaster } from "@/components/ui/sonner";
 import { ReactNode, useState } from "react";
 
 interface DashboardLayoutProps {
@@ -38,6 +39,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       >
         <AuthGuard> {children} </AuthGuard>
       </main>
+     
     </div>
   );
 }

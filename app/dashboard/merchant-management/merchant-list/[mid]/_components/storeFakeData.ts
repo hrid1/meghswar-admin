@@ -15,7 +15,7 @@ export type MerchantStoreRow = {
 
 export const merchantStoresFakeData: MerchantStoreRow[] = [
   {
-    id: "TSH001",
+    id: "ab22d676-7dd2-46ff-84dc-c2c926154eb1",
     storeName: "Tech Solutions",
     phone: "+8801234567890",
     storeAddress: "123 Tech Street, Gulshan-2, Dhaka",

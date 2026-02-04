@@ -1,5 +1,5 @@
 "use client";
-
+import { toNA } from "@/lib/utils";
 export type MerchantListRow = {
   id: string;
   merchant: { name: string; phone: string; avatarUrl?: string };
@@ -80,3 +80,26 @@ export const merchantListFakeData: MerchantListRow[] = [
   },
 ];
 
+
+
+export const formateResponse = (data:any) => {
+ return data.map((item:any) => {
+    const merchant: MerchantListRow = {
+      id: item.id,
+      merchant: {
+        name: toNA(item .full_name),
+        phone:  toNA(item.phone),
+        avatarUrl: toNA(item.avatar_url),
+      },
+      totalParcel: toNA(item.total_parcels),
+      parcelDelivered: toNA(item.total_delivered_parcels),
+      parcelReturned: toNA(item.total_returned_parcels),
+      collectedAmount: toNA(item.total_collected_amount),
+      deliveryCharge: toNA(item.total_delivery_charge),
+      totalPaid: { amount: toNA(item.total_paid_amount), lastPaidAt: toNA(item.last_paid_at)   },
+      status: toNA(item.status) === "APPROVED" ? "Active" : "Deactivate",
+      advancePayment: toNA(item.advance_payment_status) === "ON" ? "ON" : "OFF",
+    }
+    return merchant;
+  })
+}

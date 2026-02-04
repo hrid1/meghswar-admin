@@ -4,13 +4,19 @@ import React, { useMemo, useState } from "react";
 import CustomSearchInput from "@/components/reusable/CustomSearchInput";
 import { AppButton } from "@/components/reusable/CustomButton";
 import { DataTable } from "@/components/reusable/DataTable";
+import { useParams } from "next/navigation";
 
 import { storesColumns } from "./StoresCol";
+
 import { merchantStoresFakeData, type MerchantStoreRow } from "./storeFakeData";
+import AssignHubModal from "./AssignHubModal";
 
 type RowId = string | number;
 
 export default function StoresSection() {
+  const params = useParams();
+  const mid = typeof params?.mid === "string" ? params.mid : "";
+
   const [selectedIds, setSelectedIds] = useState<RowId[]>([]);
   const [search, setSearch] = useState("");
 
@@ -35,14 +41,22 @@ export default function StoresSection() {
     [selectedIds, visibleIds]
   );
 
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [selectedStore, setSelectedStore] = useState<MerchantStoreRow | null>(null);
+
   const columns = useMemo(
     () =>
       storesColumns({
-        onView: (row) => console.log("View store:", row),
+        mid,
+        onView: () => {},
         onEdit: (row) => console.log("Edit store:", row),
         onDelete: (row) => console.log("Delete store:", row),
+        onAssign: (row) => {
+          setSelectedStore(row);
+          setIsAssignOpen(true);
+        },
       }),
-    []
+    [mid]
   );
 
   return (
@@ -84,7 +98,17 @@ export default function StoresSection() {
         }}
         onToggleAll={(nextSelected) => setSelectedIds(nextSelected)}
       />
+
+      <AssignHubModal
+        isOpen={isAssignOpen}
+        onClose={() => setIsAssignOpen(false)}
+        store={selectedStore}
+        onSuccess={() => {
+          // Optionally refresh or do something after assign
+          setIsAssignOpen(false);
+          setSelectedStore(null);
+        }}
+      />
     </div>
   );
 }
-
