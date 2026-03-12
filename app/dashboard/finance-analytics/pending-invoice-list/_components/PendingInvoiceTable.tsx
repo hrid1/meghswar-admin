@@ -7,10 +7,21 @@ import { AppButton } from "@/components/reusable/CustomButton";
 
 import { pendingInvoiceColumns } from "./PendingInvoiceCol";
 import { pendingInvoiceFakeData, type PendingInvoiceRow } from "./fakeData";
+import { useGetInvoiceListQuery } from "@/redux/features/finance/financeApi";
 
 type RowId = string | number;
 
 export default function PendingInvoiceTable() {
+
+  const { data: pendingInvoiceList, isLoading, isError } =
+    useGetInvoiceListQuery({
+      invoiceStatus: "PENDING",
+      page: 1,
+      limit: 10,
+      fromDate: "2021-01-01",
+      toDate: "2028-12-31",
+    });
+
   const [selectedIds, setSelectedIds] = useState<RowId[]>([]);
   const [search, setSearch] = useState("");
 

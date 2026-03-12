@@ -36,21 +36,28 @@ const financeApi = baseApi.injectEndpoints({
     }),
 
     // INVOICE LIST
-    getInvoiceList: builder.query<any, { invoiceStatus: string, page: number, limit: number }>({
-      query: ({ invoiceStatus, page, limit }) => ({
+    // {{baseUrl}}/merchant-invoices?invoice_status=UNPAID&fromDate=2024-01-01&toDate=2024-12-31&page=1&limit=10
+    getInvoiceList: builder.query<any, { invoiceStatus?: string, page?: number, limit?: number, fromDate?: string, toDate?: string }>({
+      query: ({ invoiceStatus, page, limit, fromDate, toDate }) => ({
         url: `/merchant-invoices`,
         method: "GET",
         params: {
           invoice_status: invoiceStatus,
           page,
           limit,
+          fromDate,
+          toDate,
         },
       }),
+
       providesTags: [TAG_TYPES.Finance],
+      transformResponse: (response: any) => {
+        return response.data;
+      },
     }),
   }),
 });
-export const { useGetMerchantInvoiceEligibilityListQuery, useGetMerchantInvoiceDetailsMerchantIdQuery, useCreateMerchantInvoiceMutation } = financeApi;
+export const { useGetMerchantInvoiceEligibilityListQuery, useGetMerchantInvoiceDetailsMerchantIdQuery, useCreateMerchantInvoiceMutation, useGetInvoiceListQuery } = financeApi;
 
 
 // {
