@@ -2,28 +2,40 @@
 
 import React from "react";
 import type { Column } from "@/components/reusable/DataTable";
-import type { Invoice } from "../_lib/invoiceData";
 
-export type InvoiceRow = Invoice & { _rowId: number };
+/** Row shape for the invoice table (mapped from API eligible parcels) */
+export type InvoiceRow = {
+  _rowId: string;
+  parcelId: string;
+  merchant: string;
+  merchantId: string;
+  merchantInvoice: string;
+  additionalNote: string;
+  customer: string;
+  customerPhone: string;
+  customerAddress: string;
+  hub: string;
+  status: string;
+  collectedAmount: number;
+  deliveryCharge: number;
+  codCharge: number;
+  weightCharge: number;
+  discount: number;
+  payableAmount: number;
+};
 
 function money(n: number) {
   return new Intl.NumberFormat("en-US").format(n);
 }
 
-function StatusPill({ status }: { status: Invoice["status"] }) {
-  const cls =
-    status === "Delivered"
-      ? "bg-[#DBFFE6] text-[#0B8F3C] border-[#BDF5CF]"
-      : status === "Partial Delivery"
-        ? "bg-[#DBFFE6] text-[#0B8F3C] border-[#BDF5CF]"
-        : "bg-orange-50 text-[#FE5000] border-orange-200";
-
-  const dot =
-    status === "Delivered"
-      ? "bg-[#0B8F3C]"
-      : status === "Partial Delivery"
-        ? "bg-[#0B8F3C]"
-        : "bg-[#FE5000]";
+function StatusPill({ status }: { status: string }) {
+  const isDelivered =
+    status === "DELIVERED" || status === "PARTIAL_DELIVERY";
+  const cls = isDelivered
+    ? "bg-[#DBFFE6] text-[#0B8F3C] border-[#BDF5CF]"
+    : "bg-orange-50 text-[#FE5000] border-orange-200";
+  const dot = isDelivered ? "bg-[#0B8F3C]" : "bg-[#FE5000]";
+  const label = status.replace(/_/g, " ");
 
   return (
     <span
@@ -33,7 +45,7 @@ function StatusPill({ status }: { status: Invoice["status"] }) {
       ].join(" ")}
     >
       <span className={`h-2 w-2 rounded-full ${dot}`} />
-      {status}
+      {label}
     </span>
   );
 }

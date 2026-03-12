@@ -1,40 +1,28 @@
-import { get } from "http";
 import { baseApi } from "../api/baseApi";
 import { TAG_TYPES } from "../tagList";
 
-import { Rider, RiderResponse } from "./rider.type";
-
-export const ridersApi = baseApi.injectEndpoints({
+const storeApi =  baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getRiders: builder.query({
-      query: ({ isActive, page = 1, limit = 20 }) => ({
-        url: "/riders",
+    getStores: builder.query({
+      query: ({ isActive, page = 1, limit = 20, merchantId }) => ({
+        url: "/stores/admin/all",
         method: "GET",
         params: {
           isActive,
           page,
           limit,
+          ...(merchantId ? { merchantId } : {}),
         },
       }),
-      providesTags: [TAG_TYPES.Riders],
-    }),
-
-    getRiderById: builder.query<RiderResponse, string>({
-      query: (id) => ({
-        url: `/riders/${id}`,
-        method: "GET",
-      }),
-      providesTags: [TAG_TYPES.Riders],
+      providesTags: [TAG_TYPES.Stores],
     }),
   }),
 });
 
-export const { useGetRidersQuery, useGetRiderByIdQuery } = ridersApi;
+export const { useGetStoresQuery } = storeApi;
 
 
-
-
-
+//
 
 // import { GetRidersResponse, Rider } from "@/app/dashboard/rider-management/rider-list/types";
 // import { baseApi } from "../api/baseApi";

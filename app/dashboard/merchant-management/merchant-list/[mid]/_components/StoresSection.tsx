@@ -4,12 +4,14 @@ import React, { useMemo, useState } from "react";
 import CustomSearchInput from "@/components/reusable/CustomSearchInput";
 import { AppButton } from "@/components/reusable/CustomButton";
 import { DataTable } from "@/components/reusable/DataTable";
-import { useParams } from "next/navigation";
+
 
 import { storesColumns } from "./StoresCol";
-
-import { merchantStoresFakeData, type MerchantStoreRow } from "./storeFakeData";
+import { type MerchantStoreRow } from "./storeFakeData";
 import AssignHubModal from "./AssignHubModal";
+import SetChargesModal from "./SetChargesModal";
+import { useGetStoresQuery } from "@/redux/features/stores/storeApi";
+import { useParams } from "next/navigation";
 
 type RowId = string | number;
 
@@ -17,31 +19,61 @@ export default function StoresSection() {
   const params = useParams();
   const mid = typeof params?.mid === "string" ? params.mid : "";
 
+  const { data: sData, isLoading, isError } = useGetStoresQuery({
+    isActive: true,
+    page: 1,
+    limit: 100,
+    ...(mid ? { merchantId: mid } : {}),
+  });
+
+  const storesData = useMemo(() => {
+    if (isLoading || isError) return [];
+    const raw = sData?.data?.stores ?? [];
+    return raw.map((s: Record<string, unknown>) => ({
+      ...s,
+      id: String(s?.id ?? ""),
+      performance: (s?.performance as MerchantStoreRow["performance"]) ?? {
+        total_parcels_handled: 0,
+        successfully_delivered: 0,
+        total_returns: 0,
+      },
+    })) as MerchantStoreRow[];
+  }, [sData, isLoading, isError]);
+
   const [selectedIds, setSelectedIds] = useState<RowId[]>([]);
   const [search, setSearch] = useState("");
 
   const filteredRows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return merchantStoresFakeData;
+    if (!q) return storesData;
 
-    return merchantStoresFakeData.filter((r) => {
+    return storesData.filter((r) => {
+      const id = String(r?.id ?? "").toLowerCase();
+      const name = String(r?.business_name ?? "").toLowerCase();
+      const phone = String(r?.phone_number ?? "").toLowerCase();
+      const address = String(r?.business_address ?? "").toLowerCase();
+      const status = String(r?.status ?? "").toLowerCase();
       return (
-        r.id.toLowerCase().includes(q) ||
-        r.storeName.toLowerCase().includes(q) ||
-        r.phone.toLowerCase().includes(q) ||
-        r.storeAddress.toLowerCase().includes(q) ||
-        r.status.toLowerCase().includes(q)
+        id.includes(q) ||
+        name.includes(q) ||
+        phone.includes(q) ||
+        address.includes(q) ||
+        status.includes(q)
       );
     });
-  }, [search]);
+  }, [search, storesData]);
 
-  const visibleIds = useMemo(() => filteredRows.map((r) => r.id), [filteredRows]);
+  const visibleIds = useMemo(
+    () => filteredRows.map((r) => String(r.id)),
+    [filteredRows]
+  );
   const cleanedSelectedIds = useMemo(
     () => selectedIds.filter((id) => visibleIds.includes(String(id))),
     [selectedIds, visibleIds]
   );
 
   const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isChargesOpen, setIsChargesOpen] = useState(false);
   const [selectedStore, setSelectedStore] = useState<MerchantStoreRow | null>(null);
 
   const columns = useMemo(
@@ -54,6 +86,10 @@ export default function StoresSection() {
         onAssign: (row) => {
           setSelectedStore(row);
           setIsAssignOpen(true);
+        },
+        onSetCharges: (row) => {
+          setSelectedStore(row);
+          setIsChargesOpen(true);
         },
       }),
     [mid]
@@ -106,6 +142,16 @@ export default function StoresSection() {
         onSuccess={() => {
           // Optionally refresh or do something after assign
           setIsAssignOpen(false);
+          setSelectedStore(null);
+        }}
+      />
+
+      <SetChargesModal
+        isOpen={isChargesOpen}
+        onClose={() => setIsChargesOpen(false)}
+        store={selectedStore}
+        onSuccess={() => {
+          setIsChargesOpen(false);
           setSelectedStore(null);
         }}
       />

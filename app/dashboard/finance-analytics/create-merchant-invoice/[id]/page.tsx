@@ -6,10 +6,15 @@ import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import InvoiceTable from "./_components/InvoiceTable";
 import StatsCards from "./_components/StatsCards";
-import { invoiceData, type Invoice } from "./_lib/invoiceData";
+import {
+  useCreateMerchantInvoiceMutation,
+  useGetMerchantInvoiceDetailsMerchantIdQuery,
+} from "@/redux/features/finance/financeApi";
+import type { EligibleParcel } from "@/redux/features/finance/financeTypes";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-type RowId = string | number;
-type InvoiceRow = Invoice & { _rowId: number };
+type RowId = string;
 
 function safeDecodeURIComponent(value: string) {
   try {
@@ -21,67 +26,97 @@ function safeDecodeURIComponent(value: string) {
 
 export default function Page() {
   const params = useParams<{ id: string }>();
+  const merchantId = params?.id ?? "";
+  const router = useRouter();
+
+  const { data, isLoading, isError, refetch } =
+    useGetMerchantInvoiceDetailsMerchantIdQuery({
+      merchantId,
+    });
+
+  const [createMerchantInvoice, { isLoading: isCreating }] =
+    useCreateMerchantInvoiceMutation();
+
+  const parcels = useMemo<EligibleParcel[]>(
+    () => data?.data?.eligible_parcels ?? [],
+    [data]
+  );
 
   const [selectedIds, setSelectedIds] = useState<RowId[]>([]);
   const [search, setSearch] = useState("");
   const [merchantFilter, setMerchantFilter] = useState("");
   const [hubFilter, setHubFilter] = useState("");
 
-  const rows = useMemo<InvoiceRow[]>(
-    () => invoiceData.map((r, idx) => ({ ...r, _rowId: idx })),
-    []
-  );
-
   const merchants = useMemo(
-    () => Array.from(new Set(rows.map((r) => r.merchant))),
-    [rows]
+    () => Array.from(new Set(parcels.map((p) => p.merchant_name).filter(Boolean))),
+    [parcels]
   );
-  const hubs = useMemo(() => Array.from(new Set(rows.map((r) => r.hub))), [rows]);
+  const hubs = useMemo(
+    () => Array.from(new Set(parcels.map((p) => p.hub_name).filter(Boolean))),
+    [parcels]
+  );
 
-  const filteredRows = useMemo(() => {
+  const filteredParcels = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return rows.filter((r) => {
-      if (merchantFilter && r.merchant !== merchantFilter) return false;
-      if (hubFilter && r.hub !== hubFilter) return false;
+    return parcels.filter((p) => {
+      if (merchantFilter && p.merchant_name !== merchantFilter) return false;
+      if (hubFilter && p.hub_name !== hubFilter) return false;
       if (!q) return true;
-
       return (
-        r.parcelId.toLowerCase().includes(q) ||
-        r.customer.toLowerCase().includes(q) ||
-        r.customerPhone.toLowerCase().includes(q) ||
-        r.merchant.toLowerCase().includes(q)
+        (p.parcel_tx_id ?? "").toLowerCase().includes(q) ||
+        (p.customer_name ?? "").toLowerCase().includes(q) ||
+        (p.customer_phone ?? "").toLowerCase().includes(q) ||
+        (p.merchant_name ?? "").toLowerCase().includes(q) ||
+        (p.hub_name ?? "").toLowerCase().includes(q)
       );
     });
-  }, [rows, search, merchantFilter, hubFilter]);
+  }, [parcels, search, merchantFilter, hubFilter]);
 
-  const visibleIds = useMemo(() => filteredRows.map((r) => r._rowId), [filteredRows]);
+  const visibleIds = useMemo(
+    () => filteredParcels.map((p) => p.parcel_id),
+    [filteredParcels]
+  );
   const cleanedSelectedIds = useMemo(
-    () => selectedIds.filter((id) => visibleIds.includes(Number(id))),
+    () => selectedIds.filter((id) => visibleIds.includes(id)),
     [selectedIds, visibleIds]
   );
 
   const selectedStats = useMemo(() => {
-    const selectedSet = new Set(selectedIds.map((id) => Number(id)));
-    const selectedRows = rows.filter((r) => selectedSet.has(r._rowId));
-
+    const selectedSet = new Set(cleanedSelectedIds);
+    const selected = parcels.filter((p) => selectedSet.has(p.parcel_id));
+    const b = (p: EligibleParcel) => p.delivery_charge_breakdown;
     return {
-      parcelsSelected: selectedRows.length,
-      totalCollectedAmount: selectedRows.reduce(
-        (sum, item) => sum + item.collectedAmount,
+      parcelsSelected: selected.length,
+      totalCollectedAmount: selected.reduce((sum, p) => sum + (p.cod_collected ?? 0), 0),
+      totalDeliveryCharge: selected.reduce(
+        (sum, p) => sum + (b(p)?.delivery_charge ?? 0),
         0
       ),
-      totalDeliveryCharge: selectedRows.reduce(
-        (sum, item) => sum + item.deliveryCharge,
-        0
-      ),
-      totalPayableAmount: selectedRows.reduce(
-        (sum, item) => sum + item.payableAmount,
-        0
-      ),
+      totalPayableAmount: selected.reduce((sum, p) => sum + (p.net_payable ?? 0), 0),
     };
-  }, [selectedIds, rows]);
+  }, [cleanedSelectedIds, parcels]);
 
-  const merchantLabel = safeDecodeURIComponent(params?.id ?? "");
+  const merchantLabel = safeDecodeURIComponent(merchantId);
+
+
+  const handleCreateMerchantInvoice = async () => {
+    try {
+      if (!merchantId || cleanedSelectedIds.length === 0) return;
+      await createMerchantInvoice({
+        merchantId,
+        parcelIds: cleanedSelectedIds,
+      }).unwrap();
+      // Clear selection and refresh eligible parcels after successful creation
+      setSelectedIds([]);
+      toast.success("Invoice created successfully");  
+      await refetch();
+      router.back();
+    } catch (error) {
+      // You can replace this with a toast/snackbar in your project
+      console.error("Failed to create merchant invoice", error);
+      alert("Failed to create invoice. Please try again.");
+    }
+  }
 
   return (
     <PageShell title="Create Merchant Invoice" description="Invoice details.">
@@ -152,8 +187,12 @@ export default function Page() {
               <button
                 type="button"
                 className="h-10 rounded-lg bg-[#FE5000] px-6 text-sm font-semibold text-white hover:bg-[#FE5000]/90 disabled:opacity-50"
-                disabled={selectedStats.parcelsSelected === 0}
-                onClick={() => {}}
+                disabled={
+                  selectedStats.parcelsSelected === 0 ||
+                  isCreating ||
+                  !merchantId
+                }
+                onClick={handleCreateMerchantInvoice}
               >
                 Create Invoice / Bulk Create
               </button>
@@ -161,18 +200,29 @@ export default function Page() {
           </div>
         </div>
 
-        <InvoiceTable
-          data={filteredRows}
-          selectedRowIds={cleanedSelectedIds}
-          onToggleRow={(rowId) => {
-            setSelectedIds((prev) =>
-              prev.includes(rowId)
-                ? prev.filter((id) => id !== rowId)
-                : [...prev, rowId]
-            );
-          }}
-          onToggleAll={(nextSelected) => setSelectedIds(nextSelected)}
-        />
+        {isLoading ? (
+          <div className="rounded-xl border border-[#E9E9E9] bg-white p-8 text-center text-gray-500">
+            Loading eligible parcels…
+          </div>
+        ) : isError ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-700">
+            Failed to load eligible parcels. Please try again.
+          </div>
+        ) : (
+          <InvoiceTable
+            parcels={filteredParcels}
+            selectedRowIds={cleanedSelectedIds}
+            onToggleRow={(rowId) => {
+              const id = String(rowId);
+              setSelectedIds((prev) =>
+                prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+              );
+            }}
+            onToggleAll={(nextSelected) =>
+              setSelectedIds(nextSelected.map((x) => String(x)))
+            }
+          />
+        )}
       </div>
     </PageShell>
   );

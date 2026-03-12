@@ -2,53 +2,54 @@
 
 export type MerchantStoreRow = {
   id: string;
-  storeName: string;
-  phone: string;
-  storeAddress: string;
+  store_code: string;
+  business_name: string;
+  business_address: string;
+  phone_number: string;
+  email: string;
+  facebook_page: string;
+  is_default: boolean;
+  is_carrybee_synced: boolean;
+
   performance: {
-    totalParcelsHandled: number;
-    successfullyDelivered: number;
-    totalReturns: number;
+    total_parcels_handled: number;
+    successfully_delivered: number;
+    total_returns: number;
   };
-  status: "Active" | "Deactivate";
+
+  hub: string | null;
+  district: string;
+  thana: string;
+  area: string;
+
+  carrybee_store_id: string;
+  created_at: string;
+
+  status: "PENDING" | "Active" | "Deactivate";
 };
 
 export const merchantStoresFakeData: MerchantStoreRow[] = [
   {
-    id: "ab22d676-7dd2-46ff-84dc-c2c926154eb1",
-    storeName: "Tech Solutions",
-    phone: "+8801234567890",
-    storeAddress: "123 Tech Street, Gulshan-2, Dhaka",
+    id: "5570031b-034e-4ff7-81c2-703137fd23e6",
+    store_code: "OGG001",
+    business_name: "Oggy",
+    business_address: "Primary school, Noyarhat, Dhaka, Dhaka",
+    phone_number: "01756523968",
+    email: "hridoycse1@gmail.com",
+    facebook_page: "Velit placeat volup",
+    is_default: false,
+    is_carrybee_synced: true,
     performance: {
-      totalParcelsHandled: 1247,
-      successfullyDelivered: 1200,
-      totalReturns: 47,
+      total_parcels_handled: 0,
+      successfully_delivered: 0,
+      total_returns: 0,
     },
-    status: "Active",
-  },
-  {
-    id: "TSH002",
-    storeName: "Booklet Design Outlet",
-    phone: "+8801999887766",
-    storeAddress: "Road 12, Dhanmondi, Dhaka",
-    performance: {
-      totalParcelsHandled: 980,
-      successfullyDelivered: 930,
-      totalReturns: 50,
-    },
-    status: "Active",
-  },
-  {
-    id: "TSH003",
-    storeName: "Urban Corner",
-    phone: "+8801711223344",
-    storeAddress: "Mirpur DOHS, Dhaka-1216",
-    performance: {
-      totalParcelsHandled: 540,
-      successfullyDelivered: 490,
-      totalReturns: 50,
-    },
-    status: "Deactivate",
+    hub: null,
+    district: "Dhaka",
+    thana: "Noyarhat",
+    area: "Primary school",
+    carrybee_store_id: "9189",
+    created_at: "2026-02-22T16:26:36.933Z",
+    status: "PENDING",
   },
 ];
-

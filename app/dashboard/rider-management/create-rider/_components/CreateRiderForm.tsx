@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { uploadFileToAws } from '@/lib/upload';
 import { Upload, X, ChevronDown, User } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 
@@ -13,6 +14,7 @@ interface RiderFormData {
   guardianMobile: string;
   nidNumber: string;
   email: string;
+  password: string;
   
   // Address Information
   presentAddress: string;
@@ -56,6 +58,7 @@ const CreateRiderForm = () => {
       guardianMobile: '+8801234567890',
       nidNumber: '88741258893',
       email: 'wasi@gmail.com',
+      password: '',
       presentAddress: '72/3, Bashundhara Avenue, Dhaka',
       permanentAddress: '72/3, Bashundhara Avenue, Dhaka',
       fixedSalary: '৳ 1,187',
@@ -63,14 +66,91 @@ const CreateRiderForm = () => {
     },
   });
 
+  const getCookie = (name: string): string | null => {
+    if (typeof document === 'undefined') return null;
+    const match = document.cookie
+      ?.split('; ')
+      .find((row) => row.startsWith(`${name}=`));
+    return match ? decodeURIComponent(match.split('=')[1]) : null;
+  };
+
+  const getAuthHeaders = (): Record<string, string> => {
+    const token = getCookie('access_token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  const parseAmount = (value: string) => {
+    const numeric = value.replace(/[^0-9.]/g, '');
+    return numeric ? Number(numeric) : 0;
+  };
+
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+
   const onSubmit = async (data: RiderFormData) => {
     console.log('Form Data:', data);
     console.log('Uploaded Files:', uploadedFiles);
     
     // Here you would handle form submission with API call
     try {
-      // Your API call here
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      if (!apiBaseUrl) throw new Error('Missing NEXT_PUBLIC_API_URL');
+
+      const bikeTypeMap: Record<string, string> = {
+        'Motor Bike': 'MOTORCYCLE',
+        Bicycle: 'BICYCLE',
+        Scooter: 'SCOOTER',
+        Car: 'CAR',
+      };
+
+      const uploadTargets = [
+        { field: 'profilePhoto', module: 'riders/profile', apiField: 'photo' },
+        { field: 'nidFront', module: 'riders/nid', apiField: 'nid_front_photo' },
+        { field: 'nidBack', module: 'riders/nid', apiField: 'nid_back_photo' },
+        { field: 'licenseFront', module: 'riders/license', apiField: 'license_front_photo' },
+        { field: 'licenseBack', module: 'riders/license', apiField: 'license_back_photo' },
+        { field: 'parentNidFront', module: 'riders/parent-nid', apiField: 'parent_nid_front_photo' },
+        { field: 'parentNidBack', module: 'riders/parent-nid', apiField: 'parent_nid_back_photo' },
+      ] as const;
+
+      const uploadedKeys: Record<string, string> = {};
+
+      for (const target of uploadTargets) {
+        const file = uploadedFiles[target.field];
+        if (!file) continue;
+        const { fileKey } = await uploadFileToAws(file, target.module, apiBaseUrl);
+        if (fileKey) {
+          uploadedKeys[target.apiField] = fileKey;
+        }
+      }
+
+      const payload = {
+        full_name: data.name,
+        phone: data.mobile,
+        email: data.email,
+        password: data.password,
+        guardian_mobile_no: data.guardianMobile,
+        bike_type: bikeTypeMap[data.bikeType] || data.bikeType,
+        nid_number: data.nidNumber,
+        license_no: data.licenseNumber,
+        present_address: data.presentAddress,
+        permanent_address: data.permanentAddress,
+        fixed_salary: parseAmount(data.fixedSalary),
+        commission_per_delivery: parseAmount(data.commission),
+        ...uploadedKeys,
+      };
+
+      const riderResponse = await fetch(`${apiBaseUrl}/riders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!riderResponse.ok) {
+        throw new Error('Failed to create rider');
+      }
+
       alert('Rider created successfully!');
     } catch (error) {
       console.error('Error creating rider:', error);
@@ -311,6 +391,23 @@ const CreateRiderForm = () => {
                 />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Rider's Password *
+                </label>
+                <input
+                  type="password"
+                  {...register('password', { required: 'Password is required' })}
+                  className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors ${
+                    errors.password ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  placeholder="Enter password"
+                />
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
                 )}
               </div>
             </div>

@@ -1,127 +1,184 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { DataTable } from "@/components/reusable/DataTable";
-import { useGetRidersQuery } from "@/redux/features/riders/rider.api";
-import { riderColumns } from "./RiderColumns";
-import { Rider } from "../types";
+import React, { useEffect, useState } from "react";
+import CustomDialog from "@/components/reusable/CustomDialog";
+import { Button } from "@/components/ui/button";
+// import { Ridercolumns } from "./_components/riderCols";
+// import EditRiderModal from "./_components/EditRiderModal";
+// import { useGetRidersQuery } from "@/redux/features/rider/riderApi";
 import CustomPagination from "@/components/reusable/CustomPagination";
+import { getReadUrl } from "@/lib/upload";
+import CustomDialog2 from "@/components/reusable/CustomDialog2";
+import { useGetRidersQuery } from "@/redux/features/riders/rider.api";
+import { Ridercolumns } from "./riderCols";
+import EditRiderModal from "./EditRiderModal";
 
-export default function RiderListPage() {
-  const [hubId, setHubId] = useState<string | undefined>(undefined);
-  const [isActive, setIsActive] = useState(true);
-
+export default function ParcelReportTable() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
-
-  const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
-
-  const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
-
-  const { data, isLoading, error } = useGetRidersQuery({
-    hubId,
-    isActive,
+  const { data, isLoading } = useGetRidersQuery({
+    isActive: true,
     page,
     limit,
-    search,
   });
+  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
 
- 
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
-  const riders = data?.data?.riders ?? [];
-  const columns = useMemo(() => riderColumns(), []);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedRowIds, setSelectedRowIds] = useState<(string | number)[]>([]);
 
-  const handleToggleRow = (rowId: string | number) => {
-    setSelectedIds((prev) =>
-      prev.includes(rowId)
-        ? prev.filter((id) => id !== rowId)
-        : [...prev, rowId]
-    );
+  // Transform API data to match table structure
+  useEffect(() => {
+    const ridersList = data?.data?.riders || [];
+    const keys = ridersList
+      .map((rider: any) => rider.photo)
+      .filter((key: string) => key && !key.startsWith("http"));
+
+    let cancelled = false;
+
+    const loadUrls = async () => {
+      const entries = await Promise.all(
+        keys.map(async (key: string) => {
+          try {
+            const url = await getReadUrl(key);
+            return [key, url] as const;
+          } catch {
+            return [key, ""] as const;
+          }
+        })
+      );
+
+      if (cancelled) return;
+
+      const next: Record<string, string> = {};
+      entries.forEach(([key, url]) => {
+        if (url) next[key] = url;
+      });
+      setPhotoUrls(next);
+    };
+
+    if (keys.length === 0) {
+      setPhotoUrls({});
+      return;
+    }
+
+    loadUrls();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [data]);
+
+  const riders =
+    data?.data?.riders?.map((rider: any) => {
+      const photoValue = rider.photo;
+      const riderImg =
+        photoValue && photoValue.startsWith("http")
+          ? photoValue
+          : photoUrls[photoValue] || "https://i.pravatar.cc/150?img=default";
+
+      return {
+        riderId: rider.id,
+        rider: rider.full_name,
+        riderImg,
+        riderPhone: rider.phone,
+        vehicleType: rider.bike_type === "MOTORCYCLE" ? "Bike" : rider.bike_type,
+        licenseNo: "N/A",
+        nid: "N/A",
+        deliveryCompleted: 0,
+        deliveryReturn: 0,
+        totalCash: 0,
+      };
+    }) || [];
+
+  // Get pagination info from API response
+  const paginationData = data?.data?.pagination || {
+    total: 0,
+    page: 1,
+    limit: 20,
+    totalPages: 0,
+  };
+
+  // actions from table
+  const handleAction = (type: string, riderId: string) => {
+    setSelectedId(riderId);
+
+    if (type === "edit") setOpenEditModal(true);
+    if (type === "delete") setOpenDeleteModal(true);
   };
 
   return (
-    <div className="space-y-4 bg-white">
-      {/* Search + toolbar */}
-      <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
-        <div className="flex-1 w-full flex gap-3">
-          <input
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search by Rider Name, ID"
-            className="w-full lg:w-[480px] px-4 py-2.5 text-sm text-[#5A5A5A] bg-white border border-[#FFC3A8] rounded-lg focus:outline-none focus:border-[#FE5000]"
-          />
+    <div className="p-6">
+      {/* LOADING STATE */}
+      {isLoading && <div className="text-center py-8">Loading riders...</div>}
 
-          <button
-            onClick={() => {
-              setSearch(searchInput);
-              setPage(1);
-            }}
-            className="px-8 py-2.5 rounded-lg bg-[#FE5000] text-white text-sm font-semibold hover:opacity-95"
-          >
-            Search
-          </button>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            className="px-4 py-2 rounded-lg border border-[#FE5000] text-[#FE5000] bg-white text-sm font-medium disabled:opacity-40"
-            onClick={() => console.log("Export selected IDs:", selectedIds)}
-            disabled={selectedIds.length === 0}
-          >
-            Export(CSV)
-          </button>
-
-          <button
-            className="px-4 py-2 rounded-lg border border-[#FE5000] text-[#3A3A3A] bg-white text-sm font-medium disabled:opacity-40"
-            onClick={() => console.log("Bulk action on IDs:", selectedIds)}
-            disabled={selectedIds.length === 0}
-          >
-            Bulk Action
-          </button>
-        </div>
-      </div>
-
-      {/* Selected bar */}
-      <div className="bg-[#FFE8DD] border border-[#FFD2BF] rounded-lg px-4 py-2 flex items-center justify-between">
-        <span className="text-sm  bg-white px-5 py-1.5 rounded-md text-orange-400 font-medium">
-          {selectedIds.length} Selected
-        </span>
-
-        <button
-          className="text-sm text-[#3A3A3A] underline disabled:opacity-40"
-          onClick={() => setSelectedIds([])}
-          disabled={selectedIds.length === 0}
-        >
-          Clear
-        </button>
-      </div>
-
-      {isLoading && <div className="text-[#6B6B6B]">Loading...</div>}
-      {error && <div className="text-red-600">Failed to load riders</div>}
-
-      <div>
-        <DataTable<Rider>
-          columns={columns}
+      {/* TABLE */}
+      {!isLoading && (
+        <DataTable
+          columns={Ridercolumns(handleAction)}
           data={riders}
-          selectable
-          getRowId={(row) => row.id}
-          selectedRowIds={selectedIds}
-          onToggleRow={(rowId) => handleToggleRow(rowId)}
-          onToggleAll={(nextSelected) => setSelectedIds(nextSelected)}
-          minWidth={1200}
+          selectable={true}
+          getRowId={(row) => row.riderId}
+          selectedRowIds={selectedRowIds}
+          onToggleRow={(rowId) => {
+            setSelectedRowIds((prev) =>
+              prev.includes(rowId)
+                ? prev.filter((id) => id !== rowId)
+                : [...prev, rowId],
+            );
+          }}
+          onToggleAll={(nextSelected) => {
+            setSelectedRowIds(nextSelected);
+          }}
         />
+      )}
 
-        <CustomPagination
-          page={page}
-          totalPages={data?.data.pagination.totalPages ?? 1}
-          onPageChange={setPage}
-          totalItems={data?.data.pagination.total}
-          itemsPerPage={limit}
-          onItemsPerPageChange={setLimit}
-          showItemsPerPage
-        />
-      </div>
+      <CustomPagination
+        page={paginationData.page}
+        totalPages={paginationData.totalPages}
+        onPageChange={setPage}
+        totalItems={paginationData.total}
+        itemsPerPage={paginationData.limit}
+        show={paginationData.totalPages > 0}
+      />
+
+      {/* EDIT MODAL */}
+      <EditRiderModal
+        open={openEditModal}
+        setOpen={setOpenEditModal}
+        riderId={selectedId}
+      />
+
+      {/* DELETE MODAL */}
+      <CustomDialog2 open={openDeleteModal} setOpen={setOpenDeleteModal}>
+        <div className="flex flex-col gap-4 p-2">
+          <h2 className="text-lg font-semibold text-center text-red-600">
+            Are you sure you want to delete?
+          </h2>
+
+          <div className="flex justify-between mt-4">
+            <Button
+              className="bg-gray-300 text-black"
+              onClick={() => setOpenDeleteModal(false)}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              className="bg-red-600 text-white"
+              onClick={() => {
+                console.log("Deleted Rider:", selectedId);
+                setOpenDeleteModal(false);
+              }}
+            >
+              Confirm Delete
+            </Button>
+          </div>
+        </div>
+      </CustomDialog2>
     </div>
   );
 }

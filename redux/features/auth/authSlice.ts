@@ -6,7 +6,7 @@ import { User } from "../api/authApi";
  */
 const ACCESS_TOKEN_COOKIE_KEY = "access_token";
 const REFRESH_TOKEN_COOKIE_KEY = "refresh_token";
-const getCookie = (name: string): string | null => {
+export const getCookie = (name: string): string | null => {
   if (typeof document === "undefined") return null;
 
   const match = document.cookie

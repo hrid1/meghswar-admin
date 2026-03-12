@@ -7,58 +7,72 @@ import { AppButton } from "@/components/reusable/CustomButton";
 
 import {
   createMerchantInvoiceColumns,
+  CreateMerchantInvoiceRow,
 } from "./CreateMerchantInvoiceCol";
-import {
-  createMerchantInvoiceFakeData,
-  type CreateMerchantInvoiceRow,
-} from "./fakeData";
+
+import { useGetMerchantInvoiceEligibilityListQuery } from "@/redux/features/finance/financeApi";
 
 type RowId = string | number;
 
 export default function CreateMerchantInvoiceTable() {
+  const { data, isLoading } =
+    useGetMerchantInvoiceEligibilityListQuery(null);
+
   const [selectedIds, setSelectedIds] = useState<RowId[]>([]);
   const [search, setSearch] = useState("");
 
+  // API → Table Row Mapping
+  const rows: CreateMerchantInvoiceRow[] = useMemo(() => {
+    if (!data?.data?.merchants) return [];
+
+    return data.data.merchants.map((m) => ({
+      id: m.merchant_id,
+
+      merchant: {
+        name: m.merchant_name,
+        phone: m.phone_number,
+      },
+
+      totalParcel: m.total_parcel,
+      parcelDelivered: m.parcel_delivered,
+      parcelReturned: m.parcel_returned,
+
+      collectable: m.total_transaction,
+      collectedAmount: m.total_collected_amount,
+      deliveryCharge: m.total_delivery_charge,
+      dueAmount: m.total_due_amount,
+
+      merchantAddress: m.merchant_address,
+    }));
+  }, [data]);
+
+  // Search
   const filteredRows = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return createMerchantInvoiceFakeData;
+    const q = search.toLowerCase();
 
-    return createMerchantInvoiceFakeData.filter((r) => {
-      return (
-        r.merchant.name.toLowerCase().includes(q) ||
-        r.merchant.phone.toLowerCase().includes(q) ||
-        r.id.toLowerCase().includes(q) ||
-        r.merchantAddress.toLowerCase().includes(q)
-      );
-    });
-  }, [search]);
+    if (!q) return rows;
 
-  const visibleIds = useMemo(() => filteredRows.map((r) => r.id), [filteredRows]);
-  const cleanedSelectedIds = useMemo(
-    () => selectedIds.filter((id) => visibleIds.includes(String(id))),
-    [selectedIds, visibleIds]
-  );
+    return rows.filter((r) =>
+      r.merchant.name.toLowerCase().includes(q)
+    );
+  }, [search, rows]);
 
   const columns = useMemo(() => createMerchantInvoiceColumns(), []);
 
+  if (isLoading) return <div>Loading...</div>;
+
   return (
     <div className="space-y-4 bg-white">
-      {/* Search row */}
-      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-        <div className="flex-1 w-full">
-          <CustomSearchInput
-            placeholder="Search by Merchant Name, ID"
-            value={search}
-            onChange={setSearch}
-            className="w-full"
-            inputClassName="w-full rounded-lg border-[#FFC3A8] focus:border-[#FE5000]"
-          />
-        </div>
-        <AppButton
-          variantType="primary"
-          className="px-10 py-2.5 rounded-lg bg-[#FE5000] hover:bg-[#FE5000]/90"
-          onClick={() => {}}
-        >
+
+      {/* Search */}
+      <div className="flex gap-4">
+        <CustomSearchInput
+          placeholder="Search merchant"
+          value={search}
+          onChange={setSearch}
+        />
+
+        <AppButton variantType="primary">
           Search
         </AppButton>
       </div>
@@ -70,7 +84,7 @@ export default function CreateMerchantInvoiceTable() {
         selectable
         minWidth={1200}
         getRowId={(row) => row.id}
-        selectedRowIds={cleanedSelectedIds}
+        selectedRowIds={selectedIds}
         onToggleRow={(rowId) => {
           setSelectedIds((prev) =>
             prev.includes(rowId)
@@ -78,9 +92,8 @@ export default function CreateMerchantInvoiceTable() {
               : [...prev, rowId]
           );
         }}
-        onToggleAll={(nextSelected) => setSelectedIds(nextSelected)}
+        onToggleAll={(next) => setSelectedIds(next)}
       />
     </div>
   );
 }
-

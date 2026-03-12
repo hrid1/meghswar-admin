@@ -26,6 +26,7 @@ export const storesColumns = (opts: {
   onEdit: (row: MerchantStoreRow) => void;
   onDelete: (row: MerchantStoreRow) => void;
   onAssign: (row: MerchantStoreRow) => void;
+  onSetCharges: (row: MerchantStoreRow) => void;
 }): Column<MerchantStoreRow>[] => [
   {
     key: "id",
@@ -40,7 +41,7 @@ export const storesColumns = (opts: {
     width: "16%",
     cellClassName: "align-middle",
     render: (r) => (
-      <span className="text-sm font-semibold text-gray-900">{r.storeName}</span>
+      <span className="text-sm font-semibold text-gray-900">{r.business_name}</span>
     ),
   },
   {
@@ -48,7 +49,7 @@ export const storesColumns = (opts: {
     header: "Phone",
     width: "14%",
     cellClassName: "align-middle",
-    render: (r) => <span className="text-sm text-gray-700">{r.phone}</span>,
+    render: (r) => <span className="text-sm text-gray-700">{r.phone_number}</span>,
   },
   {
     key: "storeAddress",
@@ -57,7 +58,7 @@ export const storesColumns = (opts: {
     wrap: true,
     cellClassName: "align-middle",
     render: (r) => (
-      <span className="text-xs text-gray-600 leading-5">{r.storeAddress}</span>
+      <span className="text-xs text-gray-600 leading-5">{r.business_address}</span>
     ),
   },
   {
@@ -71,19 +72,19 @@ export const storesColumns = (opts: {
         <div>
           Total Parcels Handled:{" "}
           <span className="font-semibold text-gray-800">
-            {r.performance.totalParcelsHandled}
+            {r.performance.total_parcels_handled} 
           </span>
         </div>
         <div>
           Successfully Delivered:{" "}
           <span className="font-semibold text-gray-800">
-            {r.performance.successfullyDelivered}
+            {r.performance.successfully_delivered}
           </span>
         </div>
         <div>
           Total Returns:{" "}
           <span className="font-semibold text-gray-800">
-            {r.performance.totalReturns}
+            {r.performance.total_returns}
           </span>
         </div>
       </div>
@@ -117,7 +118,7 @@ export const storesColumns = (opts: {
           <Eye className="h-4 w-4" />
         </button> */}
 
-        <Link
+        {/* <Link
           href={
             opts.mid
               ? `/dashboard/merchant-management/merchant-list/${opts.mid}/store/${r.id}`
@@ -134,18 +135,26 @@ export const storesColumns = (opts: {
           onClick={() => opts.onEdit(r)}
         >
           <Pencil className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          className="hover:text-red-500 transition-colors bg-amber-500 text-white p-1 rounded"
-          title="Assign Hub"
-          onClick={() => opts.onAssign(r)}
-        >
-          Assign Hub
-        </button>
+        </button> */}
 
-        
-     
+        <div className="flex items-center gap-2 flex-col">
+          <button
+            type="button"
+            className="hover:text-red-500 transition-colors bg-amber-500 text-white py-1 px-1.5 rounded cursor-pointer"
+            title="Assign Hub"
+            onClick={() => opts.onAssign(r)}
+          >
+            Assign Hub
+          </button>
+          <button
+            type="button"
+            className="hover:text-red-500 transition-colors bg-amber-500 text-white py-1 px-1.5 rounded cursor-pointer"
+            title="Set Charges"
+            onClick={() => opts.onSetCharges(r)}
+          >
+            Set Charges
+          </button>
+        </div>
       </div>
     ),
   },
