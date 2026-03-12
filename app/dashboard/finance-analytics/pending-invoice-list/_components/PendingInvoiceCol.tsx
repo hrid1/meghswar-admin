@@ -2,87 +2,131 @@
 
 import React from "react";
 import type { Column } from "@/components/reusable/DataTable";
-import type { PendingInvoiceRow } from "./fakeData";
-import { AppButton } from "@/components/reusable/CustomButton";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
+
+export type PendingInvoiceRow = {
+  id: string;
+  invoiceNo: string;
+
+  merchantName: string;
+  merchantPhone: string;
+
+  date: string;
+
+  collectedAmount: number;
+  deliveryCharge: number;
+  payableAmount: number;
+
+  paymentMethod: string | null;
+};
 
 function money(n: number) {
   return new Intl.NumberFormat("en-US").format(n);
 }
 
-export const pendingInvoiceColumns = (): Column<PendingInvoiceRow>[] => [
+export const pendingInvoiceColumns = (
+  onPayNow?: (row: PendingInvoiceRow) => void
+): Column<PendingInvoiceRow>[] => [
   {
-    key: "id",
+    key: "invoiceNo",
     header: "Invoice ID",
-    width: "15%",
-    cellClassName: "align-middle font-semibold text-gray-900",
-    render: (r) => <span>{r.id}</span>,
+    width: "14%",
+    cellClassName: "font-semibold text-gray-900",
+    render: (r) => r.invoiceNo,
   },
+
   {
     key: "merchant",
     header: "Merchant",
-    width: "25%",
-    cellClassName: "align-middle",
+    width: "20%",
     render: (r) => (
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden shrink-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+        <div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden">
           <img
-            src={r.merchant.avatarUrl}
-            alt={r.merchant.name}
+            src={`https://i.pravatar.cc/80?u=${encodeURIComponent(
+              r.merchantName
+            )}`}
+            alt={r.merchantName}
             className="h-full w-full object-cover"
           />
         </div>
-        <div className="flex flex-col leading-4">
-          <span className="text-sm font-semibold text-gray-900">{r.merchant.name}</span>
-          <span className="text-xs text-gray-500">{r.merchant.phone}</span>
+
+        <div className="leading-4">
+          <div className="text-sm font-semibold">{r.merchantName}</div>
+          <div className="text-xs text-gray-500">{r.merchantPhone}</div>
         </div>
       </div>
     ),
   },
+
   {
-    key: "totalParcel",
-    header: "Total Parcel",
-    width: "15%",
-    cellClassName: "align-middle text-center",
-    headerClassName: "text-center",
-    render: (r) => <span className="text-sm font-semibold">{r.totalParcel}</span>,
+    key: "date",
+    header: "Date",
+    width: "12%",
+    cellClassName: "text-sm text-gray-600",
+    render: (r) => r.date,
   },
+
+  {
+    key: "collectedAmount",
+    header: "Collected Amount",
+    width: "14%",
+    headerClassName: "text-center",
+    cellClassName: "text-center font-semibold text-[#107E3E]",
+    render: (r) => (
+      <span>
+        {"\u09F3"} {money(r.collectedAmount)}
+      </span>
+    ),
+  },
+
+  {
+    key: "deliveryCharge",
+    header: "Total Delivery Charge",
+    width: "14%",
+    headerClassName: "text-center",
+    cellClassName: "text-center",
+    render: (r) => (
+      <span>
+        {"\u09F3"} {money(r.deliveryCharge)}
+      </span>
+    ),
+  },
+
   {
     key: "payableAmount",
     header: "Payable Amount",
-    width: "15%",
-    cellClassName: "align-middle text-center",
+    width: "12%",
     headerClassName: "text-center",
+    cellClassName: "text-center font-semibold text-[#FE5000]",
     render: (r) => (
-      <span className="text-sm font-semibold text-green-600">
+      <span>
         {"\u09F3"} {money(r.payableAmount)}
       </span>
     ),
   },
+
   {
     key: "paymentMethod",
     header: "Payment Method",
-    width: "15%",
-    cellClassName: "align-middle text-center",
-    headerClassName: "text-center",
-    render: (r) => <span className="text-sm text-gray-700">{r.paymentMethod}</span>,
+    width: "14%",
+    cellClassName: "text-sm text-gray-600",
+    render: (r) => r.paymentMethod ?? "Not Available",
   },
+
+
   {
     key: "action",
     header: "Action",
-    width: "15%",
-    cellClassName: "align-middle text-center",
-    headerClassName: "text-center",
+    width: "14%",
+    cellClassName: "text-sm text-gray-600",
     render: (r) => (
-      <div onClick={(e) => e.stopPropagation()}>
-        <AppButton
-          variantType="primary"
-          className="bg-[#FE5000] hover:bg-[#FE5000]/90 text-white px-4 py-2 rounded-lg text-xs font-semibold"
-          onClick={() => alert(`Paying merchant ${r.merchant.name}`)}
-        >
-          Pay Merchant
-        </AppButton>
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" onClick={() => onPayNow?.(r)}>
+          Pay Now
+        </Button>
       </div>
     ),
-  },
-];
+  }
+]; 

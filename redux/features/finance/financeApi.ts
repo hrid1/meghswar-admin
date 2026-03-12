@@ -55,9 +55,18 @@ const financeApi = baseApi.injectEndpoints({
         return response.data;
       },
     }),
+
+    // /merchant-invoices/:id/pay
+    payInvoice: builder.mutation<any, { id: string }>({
+      query: ({ id }) => ({
+        url: `/merchant-invoices/${id}/pay`,
+        method: "POST",
+      }),
+      invalidatesTags: [TAG_TYPES.Finance],
+    }),
   }),
 });
-export const { useGetMerchantInvoiceEligibilityListQuery, useGetMerchantInvoiceDetailsMerchantIdQuery, useCreateMerchantInvoiceMutation, useGetInvoiceListQuery } = financeApi;
+export const { useGetMerchantInvoiceEligibilityListQuery, useGetMerchantInvoiceDetailsMerchantIdQuery, useCreateMerchantInvoiceMutation, useGetInvoiceListQuery, usePayInvoiceMutation } = financeApi;
 
 
 // {
