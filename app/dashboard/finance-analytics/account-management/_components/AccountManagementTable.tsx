@@ -6,7 +6,9 @@ import CustomSearchInput from "@/components/reusable/CustomSearchInput";
 import { AppButton } from "@/components/reusable/CustomButton";
 
 import { accountManagementColumns } from "./AccountManagementCol";
-import { accountFakeData, type AccountRow } from "./fakeData";
+import { type AccountRow } from "./fakeData";
+import { useGetAccountsQuery, useUpdateAccountMutation } from "@/redux/features/accounts/accountsApi";
+import { toast } from "sonner";
 
 type RowId = string | number;
 
@@ -15,6 +17,12 @@ import ViewStatementModal from "./ViewStatementModal";
 import BalanceTransferModal from "./BalanceTransferModal";
 
 export default function AccountManagementTable() {
+    const page = 1;
+    const limit = 10;
+    
+    const { data: accounts, isLoading, isError } = useGetAccountsQuery({ page, limit });
+    const [updateAccount] = useUpdateAccountMutation();
+
     const [selectedIds, setSelectedIds] = useState<RowId[]>([]);
     const [search, setSearch] = useState("");
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -27,19 +35,49 @@ export default function AccountManagementTable() {
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
     const [transferSourceRow, setTransferSourceRow] = useState<AccountRow | undefined>(undefined);
 
+    const accountList = useMemo(() => {
+        if (Array.isArray(accounts)) return accounts;
+        if (Array.isArray(accounts?.accounts)) return accounts.accounts;
+        if (Array.isArray(accounts?.data)) return accounts.data;
+        return [];
+    }, [accounts]);
+
+    const formatLastUsed = (value?: string) => {
+        if (!value) return "-";
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return "-";
+        return d.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+    };
+
+    const rows: AccountRow[] = useMemo(() => {
+        return accountList.map((acc: any) => ({
+            id: acc.id,
+            bank: {
+                name: acc.account_name,
+                logoUrl: acc.logo_url,
+            },
+            accountNo: acc.account_number,
+            holderName: acc.account_holder_name,
+            balance: {
+                amount: Number(acc.current_balance ?? 0),
+                lastUsed: formatLastUsed(acc.updated_at ?? acc.created_at),
+            },
+            status: acc.is_active ? "Active" : "Inactive",
+        }));
+    }, [accountList]);
 
     const filteredRows = useMemo(() => {
         const q = search.trim().toLowerCase();
-        if (!q) return accountFakeData;
+        if (!q) return rows;
 
-        return accountFakeData.filter((r) => {
+        return rows.filter((r) => {
             return (
                 r.bank.name.toLowerCase().includes(q) ||
                 r.accountNo.toLowerCase().includes(q) ||
                 r.holderName.toLowerCase().includes(q)
             );
         });
-    }, [search]);
+    }, [rows, search]);
 
     const visibleIds = useMemo(() => filteredRows.map((r) => r.id), [filteredRows]);
     const cleanedSelectedIds = useMemo(
@@ -57,7 +95,23 @@ export default function AccountManagementTable() {
         setIsTransferModalOpen(true);
     };
 
-    const columns = useMemo(() => accountManagementColumns(handleViewStatement, handleBalanceTransfer), []);
+    const handleUpdateAccount = async (id: string, is_active: boolean) => {   
+
+        console.log("this is id", id);
+        try {
+            const response = await updateAccount({ id, is_active }).unwrap();
+            console.log("this is response", response);
+            toast.success(is_active ? "Account activated successfully" : "Account paused successfully");
+        } catch (error) {
+            console.error("Update account failed", error);
+            toast.error("Failed to update account");
+        }       
+    };
+
+    const columns = useMemo(() => accountManagementColumns(handleViewStatement, handleBalanceTransfer, handleUpdateAccount), []);
+
+    if (isLoading) return <div className="p-4">Loading...</div>;
+    if (isError) return <div className="p-4">Failed to load accounts</div>;
 
     return (
         <div className="space-y-6">
@@ -128,6 +182,7 @@ export default function AccountManagementTable() {
             <BalanceTransferModal
                 isOpen={isTransferModalOpen}
                 onClose={() => setIsTransferModalOpen(false)}
+                allAccounts={accountList}
                 sourceAccount={transferSourceRow}
             />
         </div>

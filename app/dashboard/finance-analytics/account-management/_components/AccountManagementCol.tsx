@@ -10,7 +10,8 @@ const money = (n: number) => new Intl.NumberFormat("en-US").format(n);
 
 export const accountManagementColumns = (
     onViewStatement: (row: AccountRow) => void,
-    onBalanceTransfer: (row: AccountRow) => void
+    onBalanceTransfer: (row: AccountRow) => void,
+    onUpdateAccount: (id: string, is_active: boolean) => void
 ): Column<AccountRow>[] => [
         {
             key: "bank",
@@ -100,9 +101,9 @@ export const accountManagementColumns = (
                         <AppButton
                             variantType="outline"
                             className="bg-[#FFF4E6] border-none text-[#FE5000] px-3 py-1 rounded-lg text-[11px] font-semibold hover:bg-[#FFE7CC]"
-                            onClick={() => { }}
+                            onClick={() => onUpdateAccount(r.id, r.status === "Active" ? false : true)}
                         >
-                            Pause
+                            {r.status === "Active" ? "Pause" : "Activate"}
                         </AppButton>
                         <AppButton
                             variantType="primary"
